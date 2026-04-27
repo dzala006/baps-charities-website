@@ -1,0 +1,129 @@
+.root {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* ---- Utility bar ---- */
+.utility {
+  background: var(--baps-brown);
+  color: var(--baps-tan);
+  font-family: var(--font-sans);
+  font-size: 12px;
+}
+
+.utilityInner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 8px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.locPicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--baps-tan);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.locChange {
+  color: var(--baps-brown-40);
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+.utilityLinks {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.utilityLink {
+  color: var(--baps-tan);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.utilityLink:hover {
+  color: #fff;
+}
+
+/* ---- Main nav bar ---- */
+.bar {
+  background: rgba(253, 252, 250, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--baps-tan);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  transition: box-shadow var(--dur-normal) var(--ease-standard);
+}
+
+.barScrolled {
+  box-shadow: var(--shadow-sm);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+  flex: 1;
+  justify-content: center;
+}
+
+.link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--baps-brown);
+  padding-bottom: 6px;
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur-fast) var(--ease-standard),
+              border-color var(--dur-fast) var(--ease-standard);
+  white-space: nowrap;
+}
+
+.link:hover {
+  color: var(--baps-dark-red);
+}
+
+.linkActive {
+  color: var(--baps-dark-red);
+  border-bottom-color: var(--baps-dark-red);
+  font-weight: 600;
+}
+
+.cta {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  padding: 11px 22px;
+  background: var(--baps-dark-red);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-standard);
+  flex-shrink: 0;
+}
+
+.cta:hover {
+  background: var(--baps-dark-red-90);
+}
