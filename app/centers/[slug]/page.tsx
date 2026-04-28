@@ -8,6 +8,28 @@ import { supabase } from "../../lib/supabase";
 
 export const revalidate = 3600;
 
+type CenterEvent = {
+  id: string;
+  slug: string;
+  title: string;
+  event_type: string;
+  event_date: string | null;
+  description: string | null;
+  photo_url: string | null;
+};
+
+const EVENT_TYPE_LABEL: Record<string, string> = {
+  "walk-run": "Walk | Run", health: "Health", education: "Education",
+  humanitarian: "Humanitarian Relief", environmental: "Environmental",
+  "food-drive": "Food Drive", community: "Community", other: "Event",
+};
+
+const EVENT_TYPE_COLOR: Record<string, string> = {
+  "walk-run": "#8E191D", health: "#1a6b3a", education: "#1a4a6b",
+  humanitarian: "#8E191D", environmental: "#3a6b1a", "food-drive": "#6b4a1a",
+  community: "#4a1a6b", other: "#7a716a",
+};
+
 type Center = {
   id: number;
   name: string;
@@ -41,6 +63,17 @@ async function getCenterBySlug(slug: string): Promise<Center | null> {
     phone: (row.primary_contact_phone as string) ?? null,
     email: (row.primary_contact_email as string) ?? null,
   };
+}
+
+async function getCenterEvents(centerId: string): Promise<CenterEvent[]> {
+  const { data } = await supabase
+    .from("center_events")
+    .select("id, slug, title, event_type, event_date, description, photo_url")
+    .eq("center_id", centerId)
+    .eq("is_published", true)
+    .order("event_date", { ascending: false })
+    .limit(20);
+  return (data as CenterEvent[]) ?? [];
 }
 
 async function getWalkStats(centerId: number): Promise<WalkStat[]> {
@@ -81,7 +114,10 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
   const center = await getCenterBySlug(slug);
   if (!center) notFound();
 
-  const walkStats = await getWalkStats(center.id);
+  const [walkStats, centerEvents] = await Promise.all([
+    getWalkStats(center.id),
+    getCenterEvents(String(center.id)),
+  ]);
 
   return (
     <PageShell>
@@ -148,6 +184,47 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
                   ))}
                 </div>
               </>
+            )}
+
+            {centerEvents.length > 0 && (
+              <div style={{ marginTop: 48 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32, color: "#2a241f", margin: "0 0 8px" }}>
+                  Events &amp; Activities
+                </h2>
+                <p style={{ fontSize: 14, color: "#7a716a", marginBottom: 28 }}>
+                  {centerEvents.length} event{centerEvents.length !== 1 ? "s" : ""} from this center
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  {centerEvents.map((ev) => {
+                    const color = EVENT_TYPE_COLOR[ev.event_type] ?? "#7a716a";
+                    const label = EVENT_TYPE_LABEL[ev.event_type] ?? "Event";
+                    const dateStr = ev.event_date
+                      ? new Date(ev.event_date + "T12:00:00").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+                      : null;
+                    return (
+                      <Link
+                        key={ev.id}
+                        href={`/centers/${center.slug}/events/${ev.slug}`}
+                        style={{ display: "grid", gridTemplateColumns: ev.photo_url ? "100px 1fr" : "1fr", gap: 16, padding: "20px 0", borderBottom: "1px solid #E4DFDA", textDecoration: "none", alignItems: "center" }}
+                      >
+                        {ev.photo_url && (
+                          <div style={{ position: "relative", width: 100, height: 70, borderRadius: 4, overflow: "hidden", background: "#E4DFDA", flexShrink: 0 }}>
+                            <img src={ev.photo_url} alt={ev.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color, background: color + "15", padding: "3px 8px", borderRadius: 999 }}>{label}</span>
+                            {dateStr && <span style={{ fontSize: 12, color: "#7a716a" }}>{dateStr}</span>}
+                          </div>
+                          <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#2a241f", fontWeight: 400, lineHeight: 1.25, marginBottom: 4 }}>{ev.title}</div>
+                          {ev.description && <div style={{ fontSize: 13, color: "#7a716a", lineHeight: 1.5 }}>{ev.description.slice(0, 120)}{ev.description.length > 120 ? "…" : ""}</div>}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
             <div style={{ marginTop: 48 }}>

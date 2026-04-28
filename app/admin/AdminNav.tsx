@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { label: "Donations", href: "/admin/donations" },
   { label: "Walk Cities", href: "/admin/walk-cities" },
   { label: "Centers", href: "/admin/centers" },
+  { label: "Center Events", href: "/admin/center-events" },
   { label: "2027 Interest", href: "/admin/interest-2027" },
   { label: "Sponsorship", href: "/admin/sponsorship" },
 ];
