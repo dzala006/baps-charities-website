@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -28,7 +29,7 @@ function CheckoutShell({ step, children }: { step: number; children: React.React
   return (
     <div style={{ minHeight: "100vh", background: D_CREAM }}>
       <header style={{ background: "#fff", borderBottom: `1px solid ${D_LINE}`, padding: "20px 48px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <a href="/" style={{ fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 700, color: D_INK, textDecoration: "none" }}>BAPS Charities</a>
+        <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 700, color: D_INK, textDecoration: "none" }}>BAPS Charities</Link>
         <div style={{ fontSize: 12, color: D_MUTED, display: "flex", gap: 8, alignItems: "center" }}>
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#3d6029", display: "inline-block" }} />
           Secure checkout · 256-bit SSL · Stripe
@@ -251,8 +252,8 @@ function CheckoutInner() {
             BAPS Charities is a 501(c)(3) public charity. EIN: 26-1530694. Your receipt is your tax deduction record.
           </div>
           <div style={{ marginTop: 28, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <a href="/get-involved" style={{ padding: 14, background: "#fff", color: D_INK, border: `1px solid ${D_LINE}`, borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Volunteer now</a>
-            <a href="/" style={{ padding: 14, background: D_BRAND, color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Return home →</a>
+            <Link href="/get-involved" style={{ padding: 14, background: "#fff", color: D_INK, border: `1px solid ${D_LINE}`, borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Volunteer now</Link>
+            <Link href="/" style={{ padding: 14, background: D_BRAND, color: "#fff", border: "none", borderRadius: 4, fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Return home →</Link>
           </div>
         </Card>
       </CheckoutShell>

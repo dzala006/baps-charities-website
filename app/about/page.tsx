@@ -58,7 +58,7 @@ export default function AboutPage() {
               </a>
             </div>
             <div style={{ marginTop: 32, padding: 28, background: "#fff", borderLeft: "3px solid #8E191D" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 22, lineHeight: 1.5, color: "#2a241f" }}>"In the joy of others lies our own."</div>
+              <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 22, lineHeight: 1.5, color: "#2a241f" }}>&ldquo;In the joy of others lies our own.&rdquo;</div>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginTop: 14 }}>— Pramukh Swami Maharaj</div>
             </div>
           </div>
