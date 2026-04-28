@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./Hero.module.css";
@@ -40,16 +40,19 @@ const ADVANCE_MS = 6000;
 
 export default function Hero() {
   const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
   const hovered = useRef(false);
+
+  const togglePause = useCallback(() => setPaused((p) => !p), []);
 
   useEffect(() => {
     const tick = setInterval(() => {
-      if (!hovered.current) {
+      if (!hovered.current && !paused) {
         setIdx((i) => (i + 1) % SLIDES.length);
       }
     }, ADVANCE_MS);
     return () => clearInterval(tick);
-  }, []);
+  }, [paused]);
 
   const slide = SLIDES[idx];
 
@@ -109,6 +112,21 @@ export default function Hero() {
                 onClick={() => setIdx(i)}
               />
             ))}
+            <button
+              onClick={togglePause}
+              aria-label={paused ? "Resume slideshow" : "Pause slideshow"}
+              className={styles.pauseBtn}
+            >
+              {paused ? (
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              ) : (
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <rect x="0" y="0" width="3" height="12" /><rect x="7" y="0" width="3" height="12" />
+                </svg>
+              )}
+            </button>
             <span className={styles.counter} aria-hidden="true">
               {String(idx + 1).padStart(2, "0")} / {String(SLIDES.length).padStart(2, "0")}
             </span>

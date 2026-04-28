@@ -26,7 +26,8 @@ export default function LocationPicker() {
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
-            style={{ flex: 1, border: "none", outline: "none", fontFamily: "var(--font-body)", fontSize: 15, color: "#2a241f", padding: "10px 0", background: "transparent" }}
+            aria-label="Search for a city or country"
+            style={{ flex: 1, border: "none", fontFamily: "var(--font-body)", fontSize: 15, color: "#2a241f", padding: "10px 0", background: "transparent" }}
             placeholder="Search for a city or country"
             value={q}
             onChange={(e) => setQ(e.target.value)}

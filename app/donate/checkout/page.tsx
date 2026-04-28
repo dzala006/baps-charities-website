@@ -152,7 +152,7 @@ function StripePaymentForm({ clientSecret, onSuccess, amount, designation, month
   return (
     <>
       {errorMsg && (
-        <div style={{ marginBottom: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 4, fontSize: 13, color: D_BRAND }}>
+        <div role="alert" style={{ marginBottom: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 4, fontSize: 13, color: D_BRAND }}>
           {errorMsg}
         </div>
       )}
@@ -161,16 +161,16 @@ function StripePaymentForm({ clientSecret, onSuccess, amount, designation, month
         <div style={{ fontSize: 12, fontWeight: 600, color: D_INK, letterSpacing: "0.04em", marginBottom: 16 }}>Donor information</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, display: "block", marginBottom: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>First name</label>
-            <input value={firstName} onChange={e => setFirstName(e.target.value)} style={inputStyle} />
+            <label htmlFor="checkout-first-name" style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, display: "block", marginBottom: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>First name</label>
+            <input id="checkout-first-name" value={firstName} onChange={e => setFirstName(e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, display: "block", marginBottom: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>Last name</label>
-            <input value={lastName} onChange={e => setLastName(e.target.value)} style={inputStyle} />
+            <label htmlFor="checkout-last-name" style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, display: "block", marginBottom: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>Last name</label>
+            <input id="checkout-last-name" value={lastName} onChange={e => setLastName(e.target.value)} style={inputStyle} />
           </div>
           <div style={{ gridColumn: "span 2" }}>
-            <label style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, display: "block", marginBottom: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>Email (receipt will be sent here)</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
+            <label htmlFor="checkout-email" style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, display: "block", marginBottom: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>Email (receipt will be sent here)</label>
+            <input id="checkout-email" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
           </div>
         </div>
       </Card>
@@ -282,10 +282,10 @@ function CheckoutInner() {
               <button style={{ padding: "20px 16px", background: "#fff", border: `1.5px solid ${D_LINE}`, borderRadius: 4, fontFamily: "var(--font-display)", fontSize: 16, color: D_MUTED, cursor: "pointer" }}>Other ↓</button>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: D_INK, letterSpacing: "0.04em" }}>Custom amount</label>
+              <label htmlFor="checkout-custom-amount" style={{ fontSize: 12, fontWeight: 600, color: D_INK, letterSpacing: "0.04em" }}>Custom amount</label>
               <div style={{ display: "flex", alignItems: "center", border: `1px solid ${D_LINE}`, borderRadius: 4, marginTop: 6 }}>
                 <span style={{ padding: "14px 16px", fontSize: 18, color: D_MUTED, fontFamily: "var(--font-display)" }}>$</span>
-                <input value={customAmt} onChange={(e) => { setCustomAmt(e.target.value); setAmount(Number(e.target.value) || 0); }} style={{ flex: 1, padding: "14px 0", fontSize: 22, fontFamily: "var(--font-display)", color: D_INK, border: "none", outline: "none", background: "transparent" }} />
+                <input id="checkout-custom-amount" value={customAmt} onChange={(e) => { setCustomAmt(e.target.value); setAmount(Number(e.target.value) || 0); }} style={{ flex: 1, padding: "14px 0", fontSize: 22, fontFamily: "var(--font-display)", color: D_INK, border: "none", background: "transparent" }} />
                 <span style={{ padding: "14px 16px", fontSize: 12, color: D_MUTED, fontWeight: 600, letterSpacing: "0.1em" }}>USD</span>
               </div>
             </div>
@@ -334,7 +334,7 @@ function CheckoutInner() {
           </Card>
 
           {stripeError && (
-            <div style={{ marginBottom: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 4, fontSize: 13, color: D_BRAND }}>
+            <div role="alert" style={{ marginBottom: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 4, fontSize: 13, color: D_BRAND }}>
               {stripeError}
             </div>
           )}

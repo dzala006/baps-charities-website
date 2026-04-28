@@ -215,3 +215,30 @@ img, svg {
   outline: 2px solid #fff;
   outline-offset: -4px;
 }
+
+/* Focus ring for keyboard navigation — replaces removed outlines on inputs */
+:focus-visible {
+  outline: 2px solid var(--baps-dark-red);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--baps-dark-red);
+  outline-offset: 0;
+  border-color: var(--baps-dark-red) !important;
+}
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

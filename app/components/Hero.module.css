@@ -206,6 +206,27 @@
   background: var(--baps-dark-red);
 }
 
+.pauseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--baps-tan);
+  background: transparent;
+  color: var(--fg-3);
+  padding: 0;
+  flex-shrink: 0;
+  transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+
+.pauseBtn:hover,
+.pauseBtn:focus-visible {
+  border-color: var(--baps-dark-red);
+  color: var(--baps-dark-red);
+}
+
 .counter {
   margin-left: auto;
   font-family: var(--font-mono);

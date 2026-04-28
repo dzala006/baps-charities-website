@@ -46,7 +46,7 @@ export default function ContactForm() {
       <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 24, color: "#2a241f", margin: 0 }}>Send us a message</h3>
 
       {status === "error" && (
-        <div style={{ marginTop: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 4, fontSize: 13, color: "#8E191D" }}>
+        <div role="alert" style={{ marginTop: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 4, fontSize: 13, color: "#8E191D" }}>
           {errorMsg}
         </div>
       )}
@@ -57,20 +57,22 @@ export default function ContactForm() {
         { label: "Subject", name: "subject", type: "text" },
       ].map(({ label, name, type }) => (
         <div key={name} style={{ marginTop: 20 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a716a", display: "block", marginBottom: 8 }}>{label}</label>
+          <label htmlFor={`contact-${name}`} style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a716a", display: "block", marginBottom: 8 }}>{label}</label>
           <input
+            id={`contact-${name}`}
             type={type}
             name={name}
             required={name !== "subject"}
             disabled={isPending}
-            style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", border: "1px solid #c9c2bb", borderRadius: 4, fontSize: 14, fontFamily: "var(--font-body)", outline: "none" }}
+            style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", border: "1px solid #c9c2bb", borderRadius: 4, fontSize: 14, fontFamily: "var(--font-body)" }}
           />
         </div>
       ))}
 
       <div style={{ marginTop: 20 }}>
-        <label style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a716a", display: "block", marginBottom: 8 }}>Message</label>
+        <label htmlFor="contact-message" style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a716a", display: "block", marginBottom: 8 }}>Message</label>
         <textarea
+          id="contact-message"
           name="message"
           rows={6}
           required

@@ -60,6 +60,7 @@ export default function FindACenterClient({ centers, regions, initialQuery = "" 
               </svg>
               <input
                 type="text"
+                aria-label="Search by city, state, or center name"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search city, state, or center name…"
@@ -71,7 +72,6 @@ export default function FindACenterClient({ centers, regions, initialQuery = "" 
                   borderRadius: 6,
                   fontSize: 15,
                   color: "#2a241f",
-                  outline: "none",
                   fontFamily: "var(--font-body)",
                   boxSizing: "border-box",
                 }}
@@ -109,7 +109,7 @@ export default function FindACenterClient({ centers, regions, initialQuery = "" 
         </div>
 
         {/* Results summary */}
-        <div style={{ fontSize: 13, color: "#7a716a", marginBottom: 24, fontWeight: 500 }}>
+        <div aria-live="polite" aria-atomic="true" style={{ fontSize: 13, color: "#7a716a", marginBottom: 24, fontWeight: 500 }}>
           {filtered.length === centers.length
             ? `${centers.length} centers across the United States`
             : `${filtered.length} center${filtered.length !== 1 ? "s" : ""} found`}

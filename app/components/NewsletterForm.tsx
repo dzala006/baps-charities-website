@@ -52,7 +52,9 @@ export default function NewsletterForm() {
         Sign up for our newsletter
       </div>
       <form onSubmit={handleSubmit} style={{ display: "flex", maxWidth: 320 }}>
+        <label htmlFor="newsletter-email" className="sr-only">Email address</label>
         <input
+          id="newsletter-email"
           type="email"
           value={email}
           onChange={(e) => {
@@ -94,17 +96,17 @@ export default function NewsletterForm() {
           →
         </button>
       </form>
-      {message && (
-        <p
-          style={{
-            marginTop: 8,
-            fontSize: 12,
-            color: status === "success" ? "#CF3728" : "#e05252",
-          }}
-        >
-          {message}
-        </p>
-      )}
+      <p
+        aria-live="polite"
+        style={{
+          marginTop: 8,
+          fontSize: 12,
+          color: status === "success" ? "#CF3728" : "#e05252",
+          minHeight: "1em",
+        }}
+      >
+        {message}
+      </p>
     </div>
   );
 }

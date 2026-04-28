@@ -29,15 +29,19 @@ export default function DonateForm() {
           </button>
         ))}
       </div>
+      <label htmlFor="donate-amount" className="sr-only">Custom donation amount in USD</label>
       <input
+        id="donate-amount"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         type="number"
+        min="1"
         style={{ width: "100%", boxSizing: "border-box", padding: "14px 16px", marginTop: 12, border: "1px solid #c9c2bb", borderRadius: 4, fontSize: 18 }}
         placeholder="Other amount"
       />
       <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#7a716a", margin: "24px 0 12px" }}>Designate</div>
-      <select value={program} onChange={(e) => setProgram(e.target.value)} style={{ width: "100%", padding: "14px 16px", border: "1px solid #c9c2bb", borderRadius: 4, fontSize: 14, background: "#fff" }}>
+      <label htmlFor="donate-program" className="sr-only">Donation designation</label>
+      <select id="donate-program" value={program} onChange={(e) => setProgram(e.target.value)} style={{ width: "100%", padding: "14px 16px", border: "1px solid #c9c2bb", borderRadius: 4, fontSize: 14, background: "#fff" }}>
         {PROGRAMS.map((p) => <option key={p}>{p}</option>)}
       </select>
       <Link href={`/donate/checkout?amount=${encodeURIComponent(String(amount))}&program=${encodeURIComponent(program)}&recurring=${recurring}`} style={{ display: "block", width: "100%", boxSizing: "border-box", padding: "18px 0", marginTop: 20, background: "#8E191D", color: "#fff", borderRadius: 4, fontSize: 14, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>
