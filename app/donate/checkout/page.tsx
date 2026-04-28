@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -10,7 +11,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { createPaymentIntent } from "../actions";
+import { createPaymentIntent, updatePaymentIntentDonorInfo } from "../actions";
 
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
@@ -29,7 +30,9 @@ function CheckoutShell({ step, children }: { step: number; children: React.React
   return (
     <div style={{ minHeight: "100vh", background: D_CREAM }}>
       <header style={{ background: "#fff", borderBottom: `1px solid ${D_LINE}`, padding: "20px 48px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 700, color: D_INK, textDecoration: "none" }}>BAPS Charities</Link>
+        <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+          <Image src="/assets/logo-color.png" alt="BAPS Charities" width={160} height={44} style={{ height: 40, width: "auto" }} />
+        </Link>
         <div style={{ fontSize: 12, color: D_MUTED, display: "flex", gap: 8, alignItems: "center" }}>
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#3d6029", display: "inline-block" }} />
           Secure checkout · 256-bit SSL · Stripe
@@ -100,7 +103,7 @@ function SummaryRow({ label, value, emphasis }: { label: string; value: string; 
   );
 }
 
-function StripePaymentForm({ clientSecret, onSuccess, amount, designation, monthly }: { clientSecret: string; onSuccess: () => void; amount: number; designation: string; monthly: boolean }) {
+function StripePaymentForm({ clientSecret, onSuccess, amount, designation, monthly }: { clientSecret: string; onSuccess: (name: string, email: string) => void; amount: number; designation: string; monthly: boolean }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isPending, startTransition] = useTransition();
@@ -117,6 +120,10 @@ function StripePaymentForm({ clientSecret, onSuccess, amount, designation, month
     }
 
     startTransition(async () => {
+      const fullName = `${firstName} ${lastName}`.trim();
+      const piId = clientSecret.split("_secret_")[0];
+      await updatePaymentIntentDonorInfo(piId, email, fullName);
+
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -124,7 +131,7 @@ function StripePaymentForm({ clientSecret, onSuccess, amount, designation, month
           receipt_email: email,
           payment_method_data: {
             billing_details: {
-              name: `${firstName} ${lastName}`,
+              name: fullName,
               email,
             },
           },
@@ -135,7 +142,7 @@ function StripePaymentForm({ clientSecret, onSuccess, amount, designation, month
       if (error) {
         setErrorMsg(error.message ?? "Payment failed. Please try again.");
       } else {
-        onSuccess();
+        onSuccess(fullName, email);
       }
     });
   }
@@ -345,7 +352,7 @@ function CheckoutInner() {
               amount={total}
               designation={PROGRAMS[designation].name}
               monthly={monthly}
-              onSuccess={() => setStep(4)}
+              onSuccess={(name, email) => { setDonorName(name); setDonorEmail(email); setStep(4); }}
             />
           </Elements>
           <div style={{ marginTop: 16 }}>

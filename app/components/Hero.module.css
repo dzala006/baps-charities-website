@@ -213,3 +213,33 @@
   color: var(--fg-3);
   letter-spacing: 0.1em;
 }
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-6) var(--space-4) var(--space-10);
+  }
+
+  .eyebrowBar {
+    display: none;
+  }
+
+  .stage {
+    grid-template-columns: 1fr;
+  }
+
+  .imagePane {
+    min-height: 260px;
+  }
+
+  .textPane {
+    padding: 32px 24px 36px;
+  }
+
+  .headline {
+    font-size: 30px;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}

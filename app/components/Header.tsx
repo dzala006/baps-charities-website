@@ -20,12 +20,22 @@ export default function Header() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Close drawer on route change
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
   useEffect(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -57,6 +67,7 @@ export default function Header() {
 
   return (
     <div className={styles.root}>
+      <a href="#main-content" className="skip-link">Skip to content</a>
       <div className={styles.utility}>
         <div className={styles.utilityInner}>
           <button className={styles.locPicker}>
@@ -101,10 +112,10 @@ export default function Header() {
           <Image
             src="/assets/logo-color.png"
             alt="BAPS Charities"
-            width={160}
-            height={44}
+            width={210}
+            height={58}
             priority
-            style={{ height: 44, width: "auto" }}
+            style={{ height: 58, width: "auto" }}
           />
         </Link>
 
@@ -123,7 +134,52 @@ export default function Header() {
         <Link href="/donate" className={styles.cta}>
           Donate
         </Link>
+
+        <button
+          className={styles.hamburger}
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
+        </button>
       </header>
+
+      {menuOpen && (
+        <div className={styles.drawer} aria-label="Mobile navigation">
+          <nav>
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`${styles.drawerLink} ${pathname === item.href ? styles.drawerLinkActive : ""}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className={styles.drawerFooter}>
+            {isLoggedIn ? (
+              <>
+                <Link href="/portal" className={styles.drawerUtilLink} onClick={() => setMenuOpen(false)}>My Account</Link>
+                <button type="button" className={styles.drawerUtilLink} onClick={() => { setMenuOpen(false); void handleSignOut(); }}>Sign out</button>
+              </>
+            ) : (
+              <Link href="/login" className={styles.drawerUtilLink} onClick={() => setMenuOpen(false)}>Sign in</Link>
+            )}
+            <Link href="/donate" className={styles.drawerCta} onClick={() => setMenuOpen(false)}>Donate</Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

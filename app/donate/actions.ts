@@ -41,3 +41,21 @@ export async function createPaymentIntent(
     return { error: "Payment initialization failed. Please try again or contact info@bapscharities.org." };
   }
 }
+
+export async function updatePaymentIntentDonorInfo(
+  paymentIntentId: string,
+  donorEmail: string,
+  donorName: string
+): Promise<{ error?: string }> {
+  if (!process.env.STRIPE_SECRET_KEY) return {};
+  try {
+    await stripe.paymentIntents.update(paymentIntentId, {
+      metadata: { donor_email: donorEmail, donor_name: donorName },
+      receipt_email: donorEmail || undefined,
+    });
+    return {};
+  } catch (err) {
+    console.error("updatePaymentIntentDonorInfo error:", err);
+    return { error: "Failed to attach donor info to payment." };
+  }
+}

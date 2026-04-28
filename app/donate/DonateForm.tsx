@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const PRESETS = [36, 54, 108, 251, 501, 1008];
-const PROGRAMS = ["Where Most Needed", "Health", "Education", "Environment", "Humanitarian Relief", "Community Empowerment"];
+const PRESETS = [50, 100, 250, 500, 1000];
+const PROGRAMS = ["Where most needed", "Health Awareness", "Educational Services", "Humanitarian Relief", "Environmental Protection", "Community Empowerment"];
 
 export default function DonateForm() {
-  const [amount, setAmount] = useState<number | string>(108);
+  const [amount, setAmount] = useState<number | string>(100);
   const [recurring, setRecurring] = useState(false);
   const [program, setProgram] = useState("Where Most Needed");
 

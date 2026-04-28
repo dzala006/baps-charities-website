@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 async function getCenters() {
   const { data, error } = await supabase
     .from("centers")
-    .select("id, name, slug, city, state, region_id")
+    .select("id, name, slug, city, state, region_id, address")
     .order("state", { ascending: true })
     .order("city", { ascending: true });
   if (error) console.error("[find-a-center] getCenters error:", error.message);
@@ -29,8 +29,9 @@ async function getRegions() {
   return data ?? [];
 }
 
-export default async function FindACenterPage() {
-  const [centers, regions] = await Promise.all([getCenters(), getRegions()]);
+export default async function FindACenterPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const [centers, regions, sp] = await Promise.all([getCenters(), getRegions(), searchParams]);
+  const initialQuery = sp.q ?? "";
 
   return (
     <PageShell>
@@ -46,7 +47,7 @@ export default async function FindACenterPage() {
         </div>
       </section>
 
-      <FindACenterClient centers={centers} regions={regions} />
+      <FindACenterClient centers={centers} regions={regions} initialQuery={initialQuery} />
     </PageShell>
   );
 }

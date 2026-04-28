@@ -5,7 +5,7 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       <Footer />
     </>
   );

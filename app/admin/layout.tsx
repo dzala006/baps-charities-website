@@ -31,17 +31,17 @@ export default async function AdminLayout({
   );
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     redirect("/login");
   }
 
   const { data: roleRow } = await supabase
     .from("user_roles")
     .select("role")
-    .eq("user_id", session.user.id)
+    .eq("user_id", user.id)
     .single();
 
   if (!roleRow || roleRow.role !== "admin") {
@@ -56,7 +56,7 @@ export default async function AdminLayout({
         fontFamily: "var(--font-body, Inter, sans-serif)",
       }}
     >
-      <AdminNav userEmail={session.user.email ?? ""} />
+      <AdminNav userEmail={user.email ?? ""} />
 
       <main
         style={{
