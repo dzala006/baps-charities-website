@@ -8,22 +8,24 @@ export const metadata: Metadata = {
   description: "Find your nearest BAPS center across 12 countries and 140+ cities worldwide.",
 };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 async function getCenters() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("centers")
     .select("id, name, slug, city, state, region_id")
     .order("state", { ascending: true })
     .order("city", { ascending: true });
+  if (error) console.error("[find-a-center] getCenters error:", error.message);
   return data ?? [];
 }
 
 async function getRegions() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("regions")
     .select("id, name")
     .order("name", { ascending: true });
+  if (error) console.error("[find-a-center] getRegions error:", error.message);
   return data ?? [];
 }
 
