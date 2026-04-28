@@ -95,12 +95,12 @@ export default function AnnualReport2024Page() {
         <div style={{ maxWidth: 880, margin: "0 auto" }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#8E191D", marginBottom: 32 }}>A letter from our Trustees</div>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 36, lineHeight: 1.35, color: "#2a241f", margin: 0, fontStyle: "italic" }}>
-            We don't measure a year in dollars granted, though we are honored to report $8.2M of them. We measure it in the woman in Houston whose diabetes was caught at a free screening. The 12,000 trees that will outlive every one of us. The teenager in Edison who ran her first food drive.
+            We don&apos;t measure a year in dollars granted, though we are honored to report $8.2M of them. We measure it in the woman in Houston whose diabetes was caught at a free screening. The 12,000 trees that will outlive every one of us. The teenager in Edison who ran her first food drive.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, marginTop: 64, fontSize: 16, lineHeight: 1.8, color: "#4C4238" }}>
             <div>
-              <p style={{ margin: 0 }}>Fiscal year 2024 was — by every metric we track — the most consequential year in BAPS Charities North America's history. We expanded into 18 new cities. We launched our first dedicated climate curriculum. We responded to two natural disasters within a 30‑day window and never paused our regular programming.</p>
-              <p>We did all of it without a single full‑time employee. 100% of our work is volunteer‑powered. 95¢ of every dollar reached a program. The remaining 5¢ paid for the audited financials you'll find on page 24.</p>
+              <p style={{ margin: 0 }}>Fiscal year 2024 was — by every metric we track — the most consequential year in BAPS Charities North America&apos;s history. We expanded into 18 new cities. We launched our first dedicated climate curriculum. We responded to two natural disasters within a 30‑day window and never paused our regular programming.</p>
+              <p>We did all of it without a single full‑time employee. 100% of our work is volunteer‑powered. 95¢ of every dollar reached a program. The remaining 5¢ paid for the audited financials you&apos;ll find on page 24.</p>
             </div>
             <div>
               <p style={{ margin: 0 }}>None of this happens without you. The volunteers who show up before dawn. The donors who set up monthly recurring gifts and never ask for a thank‑you. The corporate partners who match without a press release.</p>
@@ -147,16 +147,16 @@ export default function AnnualReport2024Page() {
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#8E191D" }}>Story · Health</div>
             <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 56, lineHeight: 1.05, margin: "16px 0 0", letterSpacing: "-0.01em" }}>
-              "They caught it before I knew anything was wrong."
+              &quot;They caught it before I knew anything was wrong.&quot;
             </h2>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: "#4C4238", marginTop: 32 }}>
               Sushila Patel walked into the Houston spring health camp in March 2024 expecting a routine blood pressure check. Sixteen minutes later, a volunteer endocrinologist named Dr. Mehta showed her an A1C number that meant pre‑diabetes. She left with a meal plan, a follow‑up appointment, and three months of free metformin from a partner pharmacy.
             </p>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: "#4C4238", marginTop: 16 }}>
-              Stories like Sushila's happened 34,200 times this year. Free care, full dignity, no insurance card needed.
+              Stories like Sushila&apos;s happened 34,200 times this year. Free care, full dignity, no insurance card needed.
             </p>
             <blockquote style={{ borderLeft: "3px solid #8E191D", paddingLeft: 24, margin: "40px 0 0", fontFamily: "var(--font-display)", fontSize: 22, lineHeight: 1.5, fontStyle: "italic", color: "#2a241f" }}>
-              "I came in for the free thing. I left feeling like someone actually cared."
+              &quot;I came in for the free thing. I left feeling like someone actually cared.&quot;
               <div style={{ fontStyle: "normal", fontSize: 13, color: "#7a716a", marginTop: 12, letterSpacing: "0.04em" }}>— Sushila Patel, Houston</div>
             </blockquote>
           </div>
@@ -257,7 +257,7 @@ export default function AnnualReport2024Page() {
       <section style={{ background: "#8E191D", color: "#fff", padding: "96px 32px", textAlign: "center" }}>
         <div style={{ maxWidth: 880, margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "clamp(40px, 5vw, 72px)", lineHeight: 1.05, margin: 0, letterSpacing: "-0.01em" }}>
-            Help us write next year's report.
+            Help us write next year&apos;s report.
           </h2>
           <p style={{ fontSize: 18, color: "#f5d7d7", marginTop: 24, lineHeight: 1.6 }}>Every recurring donor, every volunteer, every team that walks — you are this report.</p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 40 }}>

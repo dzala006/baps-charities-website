@@ -21,7 +21,7 @@ export default function SponsorshipPage() {
             Partner with a 100%‑volunteer movement.
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.7, color: "#b1aca7", maxWidth: 720, marginTop: 24 }}>
-            Your sponsorship dollars don't pay for executive salaries or office space. They go directly to programs — measurable, traceable, reportable.
+            Your sponsorship dollars don&apos;t pay for executive salaries or office space. They go directly to programs — measurable, traceable, reportable.
           </p>
         </div>
       </section>
@@ -52,7 +52,7 @@ export default function SponsorshipPage() {
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginBottom: 12 }}>Custom partnership</div>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32, color: "#2a241f", margin: 0 }}>Need something tailored?</h3>
-              <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", marginTop: 12, maxWidth: 640 }}>Multi-year commitments, naming rights, employee volunteer days, cause-marketing programs — we'll build the right package for your goals. Contact our partnerships team.</p>
+              <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", marginTop: 12, maxWidth: 640 }}>Multi-year commitments, naming rights, employee volunteer days, cause-marketing programs — we&apos;ll build the right package for your goals. Contact our partnerships team.</p>
             </div>
             <a href="/contact" style={{ padding: "16px 32px", background: "#2a241f", color: "#fff", textDecoration: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap" }}>Get in touch →</a>
           </div>
