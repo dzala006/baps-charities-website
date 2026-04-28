@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
+import * as Sentry from "@sentry/nextjs";
 import Stripe from "stripe";
-import { supabaseAdmin } from "@/app/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/app/lib/supabase-admin";
 
 // ---------------------------------------------------------------------------
 // Lazy Stripe instance — only constructed on first request, not at build time
@@ -156,27 +157,27 @@ export async function POST(req: Request): Promise<Response> {
     const designation = pi.metadata?.designation ?? "General";
     const amountUsd = pi.amount / 100;
 
-    const { error: dbError } = await supabaseAdmin
-      .from("donations")
-      .upsert(
-        {
-          stripe_payment_id: pi.id,
-          amount_cents: pi.amount,
-          amount_usd: amountUsd,
-          currency: pi.currency,
-          designation,
-          donor_email: donorEmail,
-          donor_name: donorName,
-          created_at: new Date().toISOString(),
-        },
-        { onConflict: "stripe_payment_id", ignoreDuplicates: true }
-      );
+    const { error: dbError } = await getSupabaseAdmin().from("donations").upsert(
+      {
+        stripe_payment_id: pi.id,
+        amount_cents: pi.amount,
+        amount_usd: amountUsd,
+        currency: pi.currency,
+        designation,
+        donor_email: donorEmail,
+        donor_name: donorName,
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: "stripe_payment_id", ignoreDuplicates: true }
+    );
 
     if (dbError) {
-      console.error("Failed to insert donation into Supabase:", dbError);
-      // Don't return an error response — Stripe should not retry for a DB error
+      console.error("Failed to upsert donation:", dbError);
+      Sentry.captureException(dbError, { tags: { stripe_payment_id: pi.id } });
+      return new Response("Database error", { status: 500 });
     }
 
+    // Only send receipt email if the DB write succeeded
     if (donorEmail) {
       try {
         await sendReceiptEmail({
@@ -188,6 +189,8 @@ export async function POST(req: Request): Promise<Response> {
         });
       } catch (mailErr) {
         console.error("Failed to send receipt email:", mailErr);
+        Sentry.captureException(mailErr, { tags: { stripe_payment_id: pi.id } });
+        // Don't return error — receipt email failure should not cause Stripe to retry
       }
     }
   } else if (event.type === "payment_intent.payment_failed") {
