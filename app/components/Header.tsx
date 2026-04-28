@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import styles from "./Header.module.css";
 
 const NAV_ITEMS = [
@@ -16,13 +17,43 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+    if (!supabaseUrl || supabaseUrl === "https://placeholder.supabase.co") return;
+
+    const supabase = createBrowserClient(supabaseUrl, supabaseKey);
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+    if (!supabaseUrl) return;
+    const supabase = createBrowserClient(supabaseUrl, supabaseKey);
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <div className={styles.root}>
@@ -39,7 +70,20 @@ export default function Header() {
           </button>
 
           <div className={styles.utilityLinks}>
-            <Link href="/portal" className={styles.utilityLink}>My Account</Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/portal" className={styles.utilityLink}>My Account</Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className={styles.utilityLink}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className={styles.utilityLink}>Sign in</Link>
+            )}
             <Link href="/sponsorship" className={styles.utilityLink}>Sponsorship</Link>
             <Link href="/contact" className={styles.utilityLink}>Contact</Link>
             <button className={styles.utilityLink} aria-label="Search">

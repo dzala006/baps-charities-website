@@ -1,24 +1,15 @@
-"use client";
-import { useState } from "react";
+import type { Metadata } from "next";
 import PageShell from "../components/PageShell";
 import Breadcrumb from "../components/Breadcrumb";
-import Link from "next/link";
+import GetInvolvedFilter from "./GetInvolvedFilter";
 
-const WAYS = [
-  { cat: "Volunteer", title: "Volunteer locally", body: "Join one of 80+ volunteer chapters across North America. Health camps, tutoring, environmental drives — find a fit near you.", cta: "Find a chapter" },
-  { cat: "Donate", title: "One‑time gift", body: "Direct support for the program of your choice — health, education, environment, humanitarian relief, or general fund.", cta: "Donate now" },
-  { cat: "Donate", title: "Recurring giving", body: "Sustaining members enable us to plan multi‑year initiatives. Set it and forget it; cancel anytime.", cta: "Set up monthly" },
-  { cat: "Donate", title: "Workplace matching", body: "Many North American employers match charitable gifts dollar‑for‑dollar. Check if yours does.", cta: "Check matching" },
-  { cat: "Donate", title: "Stocks & DAFs", body: "Donor‑advised funds, appreciated securities, and IRA qualified charitable distributions are welcomed.", cta: "Plan a gift" },
-  { cat: "Volunteer", title: "Skills‑based volunteering", body: "Physicians, attorneys, accountants, designers, software engineers — your professional skills are needed.", cta: "Apply skills" },
-  { cat: "Volunteer", title: "Youth & student leaders", body: "High school and college students lead chapters, organize events, and earn service hours that matter.", cta: "Youth program" },
-  { cat: "Partner", title: "Corporate partnership", body: "Sponsor an event, co‑host a health fair, or build a multi‑year giving partnership with measurable impact.", cta: "Talk to us" },
-  { cat: "Partner", title: "NGO collaboration", body: "We partner with hospitals, food banks, parks departments, and community orgs across 12 regions.", cta: "Partner with us" },
-];
+export const metadata: Metadata = {
+  title: "Get Involved | BAPS Charities",
+  description:
+    "Volunteer, donate, or partner with BAPS Charities. There is a place for you here.",
+};
 
 export default function GetInvolvedPage() {
-  const [filter, setFilter] = useState("All");
-  const filtered = filter === "All" ? WAYS : WAYS.filter(w => w.cat === filter);
   return (
     <PageShell>
       <section style={{ background: "#8E191D", color: "#fff", padding: "88px 32px 80px" }}>
@@ -28,26 +19,26 @@ export default function GetInvolvedPage() {
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "clamp(40px,5vw,72px)", lineHeight: 1.05, margin: 0, maxWidth: 1000 }}>
             Service is not what you give.<br /><em style={{ color: "#f9e2dd", fontStyle: "italic" }}>It is who you become.</em>
           </h1>
-          <p style={{ fontSize: 18, lineHeight: 1.65, color: "#f1dcdd", maxWidth: 700, marginTop: 28 }}>There is a place for you here — whether you have an hour a year, an evening a month, or a career to dedicate.</p>
+          <p style={{ fontSize: 18, lineHeight: 1.65, color: "#f1dcdd", maxWidth: 700, marginTop: 28 }}>
+            There is a place for you here — whether you have an hour a year, an evening a month, or a career to dedicate.
+          </p>
         </div>
       </section>
-      <section style={{ padding: "56px 32px 96px", background: "#faf7f3" }}>
+      <section style={{ padding: "56px 32px 0", background: "#faf7f3" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 40, flexWrap: "wrap" }}>
-            {["All", "Volunteer", "Donate", "Partner"].map(f => (
-              <button key={f} onClick={() => setFilter(f)} style={{ padding: "10px 20px", borderRadius: 999, border: "1px solid #c9c2bb", background: filter === f ? "#2a241f" : "#fff", color: filter === f ? "#fff" : "#4C4238", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>{f}</button>
-            ))}
+          <div style={{ background: "#fff", border: "1px solid #E4DFDA", padding: "40px 48px", marginBottom: 56 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginBottom: 12 }}>Employer Match</div>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32, lineHeight: 1.15, margin: "0 0 20px", color: "#2a241f" }}>Double Your Impact</h2>
+            <p style={{ fontSize: 15, lineHeight: 1.8, color: "#4C4238", maxWidth: 720, margin: 0 }}>
+              Your employer may match your donation — doubling or tripling its impact at no extra cost to you. Over 7,500 companies offer matching gift programs. Check with your HR department or search your employer on{" "}
+              <a href="https://doublethedonation.com" target="_blank" rel="noopener noreferrer" style={{ color: "#8E191D" }}>Double the Donation</a>.
+            </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
-            {filtered.map(w => (
-              <div key={w.title} style={{ background: "#fff", padding: 32, borderRadius: 4, border: "1px solid #E4DFDA", display: "flex", flexDirection: "column" }}>
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#7a716a", marginBottom: 8 }}>{w.cat}</div>
-                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 24, lineHeight: 1.2, margin: 0, color: "#2a241f" }}>{w.title}</h3>
-                <p style={{ fontSize: 14, lineHeight: 1.65, color: "#4C4238", marginTop: 12, flex: 1 }}>{w.body}</p>
-                <Link href="/donate" style={{ marginTop: 20, fontSize: 13, fontWeight: 600, color: "#8E191D", textDecoration: "none" }}>{w.cta} →</Link>
-              </div>
-            ))}
-          </div>
+        </div>
+      </section>
+      <section style={{ padding: "0 32px 96px", background: "#faf7f3" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+          <GetInvolvedFilter />
         </div>
       </section>
     </PageShell>

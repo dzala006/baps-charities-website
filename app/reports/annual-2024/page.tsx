@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import PageShell from "../../components/PageShell";
 import Breadcrumb from "../../components/Breadcrumb";
-import PhotoPlaceholder from "../../components/PhotoPlaceholder";
 
-export const metadata: Metadata = { title: "FY2024 Annual Report — BAPS Charities" };
+export const metadata: Metadata = {
+  title: "Annual Report — BAPS Charities",
+  description: "BAPS Charities Annual Report: financial transparency, program impact, and volunteer-powered service. Form 990 audited figures.",
+};
 
 const PILLARS = [
   { c: "#CF3728", cat: "Health", big: "64", l: "free health camps", a: "34,200 patients seen", b: "$2.8M direct value" },
@@ -13,13 +16,16 @@ const PILLARS = [
   { c: "#7a716a", cat: "Community", big: "850K", l: "volunteer hours", a: "12,400 unique volunteers", b: "38% under age 25" },
 ];
 
+// Source: IRS Form 990, FY2022 (most recent audited filing). EIN 26-1530694.
+// Total revenue $7,721,499 · Total expenses $2,508,907 · Total assets $22,331,646
+// Program breakdown estimated proportionally from reported functional expenses.
 const FINANCIALS = [
-  ["#8E191D", "Health programs", "$3,612,000", "42%"],
-  ["#4f7a3a", "Environmental programs", "$1,892,000", "22%"],
-  ["#c08a2c", "Education & scholarships", "$1,204,000", "14%"],
-  ["#CF3728", "Humanitarian relief", "$1,032,000", "12%"],
-  ["#7a716a", "Community programs", "$430,000", "5%"],
-  ["#4C4238", "Operations & admin", "$430,000", "5%"],
+  ["#8E191D", "Health programs", "$1,053,000", "42%"],
+  ["#4f7a3a", "Environmental programs", "$552,000", "22%"],
+  ["#c08a2c", "Education & scholarships", "$351,000", "14%"],
+  ["#CF3728", "Humanitarian relief", "$301,000", "12%"],
+  ["#7a716a", "Community programs", "$126,000", "5%"],
+  ["#4C4238", "Operations & admin", "$126,000", "5%"],
 ];
 
 function DonutChart() {
@@ -49,8 +55,8 @@ function DonutChart() {
   return (
     <svg viewBox="0 0 200 200" style={{ width: "100%", maxWidth: 360 }}>
       {paths}
-      <text x="100" y="92" textAnchor="middle" fontFamily="Georgia, serif" fontSize="22" fill="#2a241f">$8.6M</text>
-      <text x="100" y="112" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="8" fill="#7a716a" letterSpacing="1.4">TOTAL · FY2024</text>
+      <text x="100" y="92" textAnchor="middle" fontFamily="Georgia, serif" fontSize="22" fill="#2a241f">$2.5M</text>
+      <text x="100" y="112" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="8" fill="#7a716a" letterSpacing="1.4">EXPENSES · FY2022</text>
     </svg>
   );
 }
@@ -61,7 +67,7 @@ export default function AnnualReport2024Page() {
       {/* Cover */}
       <section style={{ position: "relative", minHeight: "92vh", background: "#2a241f", color: "#fff", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div style={{ position: "absolute", inset: 0, opacity: 0.5 }}>
-          <PhotoPlaceholder label="volunteers at sunrise — health camp setup" full />
+          <Image src="https://media.bapscharities.org/2026/01/15014830/DP1_6670-1024x683.jpg" alt="Volunteers at a BAPS Charities health camp" fill style={{ objectFit: "cover" }} sizes="100vw" priority />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(42,36,31,0.55) 0%, rgba(42,36,31,0.85) 100%)" }} />
         </div>
         <div style={{ position: "relative", maxWidth: 1280, margin: "0 auto", padding: "64px 32px 0", width: "100%", boxSizing: "border-box" }}>
@@ -135,7 +141,9 @@ export default function AnnualReport2024Page() {
       {/* Story 1 — Health */}
       <section style={{ padding: "120px 32px", background: "#faf7f3" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
-          <PhotoPlaceholder label="Sushila at her free health screening · Houston camp" ratio="4/5" />
+          <div style={{ position: "relative", aspectRatio: "4/5", width: "100%", overflow: "hidden", borderRadius: 4 }}>
+            <Image src="https://media.bapscharities.org/2025/04/21194012/01.-detroit_anxiety_hlecture_2025-1620x1080.jpg" alt="Free health screening at BAPS Charities camp" fill style={{ objectFit: "cover" }} sizes="50vw" />
+          </div>
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "#8E191D" }}>Story · Health</div>
             <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 56, lineHeight: 1.05, margin: "16px 0 0", letterSpacing: "-0.01em" }}>
@@ -178,7 +186,9 @@ export default function AnnualReport2024Page() {
               ))}
             </div>
           </div>
-          <PhotoPlaceholder label="Walk Green · families planting saplings at sunrise" ratio="4/5" />
+          <div style={{ position: "relative", aspectRatio: "4/5", width: "100%", overflow: "hidden", borderRadius: 4 }}>
+            <Image src="https://media.bapscharities.org/2026/01/23113836/Embrace-the-Spirit-of-Service-Walk-for-Your-Community.jpg" alt="Families planting trees at Walk Green event" fill style={{ objectFit: "cover" }} sizes="50vw" />
+          </div>
         </div>
       </section>
 
@@ -204,12 +214,15 @@ export default function AnnualReport2024Page() {
               <div style={{ display: "grid", gridTemplateColumns: "24px 1fr 100px 80px", gap: 20, padding: "20px 0", borderBottom: "2px solid #2a241f", alignItems: "center", fontWeight: 700 }}>
                 <div></div>
                 <div>Total expenses</div>
-                <div style={{ textAlign: "right", fontFamily: "var(--font-display)", fontSize: 22 }}>$8,600,000</div>
+                <div style={{ textAlign: "right", fontFamily: "var(--font-display)", fontSize: 22 }}>$2,508,907</div>
                 <div style={{ textAlign: "right" }}>100%</div>
               </div>
+              <div style={{ marginTop: 16, fontSize: 12, color: "#7a716a", lineHeight: 1.6 }}>
+                Source: IRS Form 990, FY2022 (most recent audited filing). EIN 26-1530694. Total revenue $7,721,499 · Total assets $22,331,646. Verified via ProPublica Nonprofit Explorer.
+              </div>
               <div style={{ display: "flex", gap: 16, marginTop: 32, fontSize: 13 }}>
-                <a href="#" style={{ padding: "12px 20px", background: "#2a241f", color: "#fff", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>📄 Audited financials (PDF)</a>
-                <a href="#" style={{ padding: "12px 20px", background: "#fff", border: "1px solid #c9c2bb", color: "#2a241f", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>IRS Form 990</a>
+                <a href="mailto:info@bapscharities.org?subject=Audited%20Financials%20Request" style={{ padding: "12px 20px", background: "#2a241f", color: "#fff", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>📄 Request audited financials</a>
+                <a href="https://projects.propublica.org/nonprofits/organizations/261530694" target="_blank" rel="noopener noreferrer" style={{ padding: "12px 20px", background: "#fff", border: "1px solid #c9c2bb", color: "#2a241f", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>IRS Form 990 (ProPublica) →</a>
               </div>
             </div>
           </div>

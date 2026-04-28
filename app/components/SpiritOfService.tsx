@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function SpiritOfService() {
   return (
@@ -15,10 +16,16 @@ export default function SpiritOfService() {
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ aspectRatio: "16/9", borderRadius: 12, background: "#4C4238", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 14px 36px rgba(76,66,56,0.18)" }}>
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.4"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <div style={{ position: "relative", aspectRatio: "16/9", borderRadius: 12, overflow: "hidden", boxShadow: "0 14px 36px rgba(76,66,56,0.18)" }}>
+            <Image
+              src="https://media.bapscharities.org/2026/01/15014830/DP1_6670-1024x683.jpg"
+              alt="The Spirit of Service"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 640px"
+            />
           </div>
-          <div style={{ fontSize: 12, color: "#7a716a", fontStyle: "italic" }}>1:42 · The Spirit of Service</div>
+          <div style={{ fontSize: 12, color: "#7a716a", fontStyle: "italic" }}>The Spirit of Service</div>
         </div>
       </div>
     </section>

@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import PageShell from "../components/PageShell";
 import Breadcrumb from "../components/Breadcrumb";
-import PhotoPlaceholder from "../components/PhotoPlaceholder";
 
 export const metadata: Metadata = { title: "Events — BAPS Charities" };
 
 const CAT_COLOR: Record<string, string> = { Environment: "#4f7a3a", Health: "#8E191D", Education: "#CF3728", Fundraiser: "#c08a2c" };
+const CAT_IMAGE: Record<string, string> = {
+  Fundraiser: "https://media.bapscharities.org/2026/01/23113836/Embrace-the-Spirit-of-Service-Walk-for-Your-Community.jpg",
+  Health: "https://media.bapscharities.org/2025/04/21194012/01.-detroit_anxiety_hlecture_2025-1620x1080.jpg",
+  Environment: "https://media.bapscharities.org/2026/01/23113836/Embrace-the-Spirit-of-Service-Walk-for-Your-Community.jpg",
+  Education: "https://media.bapscharities.org/2026/01/23113836/Embrace-the-Spirit-of-Service-Walk-for-Your-Community.jpg",
+};
 const EVENTS = [
   { date: "May 30–Jun 6, 2026", city: "50+ Cities Nationwide", title: "BAPS Charities Walk | Run 2026", cat: "Fundraiser", spots: "~50,000 walkers · $15 registration", slug: "walk-run-2026" },
   { date: "Apr 12, 2026", city: "Atlanta, GA", title: "Spring Health Fair", cat: "Health", spots: "RSVP open", slug: "" },
@@ -33,7 +39,9 @@ export default function EventsPage() {
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
           {EVENTS.map(e => (
             <Link key={e.title} href={e.slug ? `/events/${e.slug}` : "/events"} style={{ background: "#fff", borderRadius: 4, overflow: "hidden", textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", border: "1px solid #E4DFDA" }}>
-              <PhotoPlaceholder label={e.title} ratio="3/2" />
+              <div style={{ position: "relative", aspectRatio: "3/2", width: "100%", overflow: "hidden" }}>
+                <Image src={CAT_IMAGE[e.cat] || CAT_IMAGE.Fundraiser} alt={e.title} fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 33vw" />
+              </div>
               <div style={{ padding: 24 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                   <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: CAT_COLOR[e.cat] || "#8E191D" }}>{e.cat}</span>

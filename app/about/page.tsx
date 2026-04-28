@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import PageShell from "../components/PageShell";
 import Breadcrumb from "../components/Breadcrumb";
 import PhotoPlaceholder from "../components/PhotoPlaceholder";
 
 export const metadata: Metadata = { title: "About — BAPS Charities" };
 
-const STATS = [{ num: "12", label: "Countries" }, { num: "50,000+", label: "Walkers annually" }, { num: "662K+", label: "Lbs food distributed (Canada 2025)" }, { num: "100%", label: "Volunteer‑run" }];
+const STATS = [{ num: "12", label: "Countries on 5 continents" }, { num: "140+", label: "Cities worldwide" }, { num: "97%", label: "Charity Navigator score" }, { num: "100%", label: "Volunteer‑run" }];
 const TIMELINE = [
-  { year: "1945", title: "BAPS founded", body: "Bochasanwasi Akshar Purushottam Sanstha is established by Shastriji Maharaj in Gujarat, India." },
-  { year: "2000", title: "BAPS Care International founded", body: "Established as an independent charitable organization to extend service across North America and beyond." },
-  { year: "2001", title: "Gujarat earthquake response", body: "Coordinated relief and reconstruction efforts; rebuilt 16 villages and a hospital." },
-  { year: "2007", title: "Renamed BAPS Charities", body: "Organization renamed to BAPS Charities, now active in 12 countries across five continents." },
+  { year: "1907", title: "BAPS founded", body: "Bochasanwasi Akshar Purushottam Sanstha is established by Shastriji Maharaj in Gujarat, India — rooting the spirit of selfless service in Hindu devotion." },
+  { year: "2000", title: "BAPS Care International founded", body: "Formally established as an independent 501(c)(3) charitable organization to extend grassroots service across North America and beyond." },
+  { year: "2001", title: "Gujarat earthquake response", body: "Coordinated relief and reconstruction efforts; rebuilt 16 villages and a hospital in one of the largest disaster responses in BAPS history." },
+  { year: "2007", title: "Renamed BAPS Charities", body: "Organization renamed to BAPS Charities, now registered in 9 countries and active in 12 countries across five continents — US, Canada, UK, South Africa, Kenya, Tanzania, Uganda, New Zealand, and Australia." },
 ];
 const LEADERS = [
   { name: "Mahant Swami Maharaj", role: "Spiritual Guide" },
-  { name: "Board of Trustees", role: "Governance — 7 members" },
-  { name: "Regional Directors", role: "12 regions across NA" },
-  { name: "Program Leads", role: "Health · Education · Environment" },
+  { name: "Board of Trustees", role: "Governance — volunteer board" },
+  { name: "Regional Directors", role: "15 Canadian + 100+ US centres" },
+  { name: "Program Leads", role: "Health · Education · Environment · Humanitarian" },
 ];
 
 export default function AboutPage() {
@@ -45,14 +46,31 @@ export default function AboutPage() {
               To care for the world by caring for societies, families, and individuals.
             </h2>
             <p style={{ fontSize: 16, lineHeight: 1.75, color: "#4C4238", marginTop: 28 }}>
-              BAPS Charities operates as a registered 501(c)(3) nonprofit in North America, with sister organizations across 12 countries on five continents. Every dollar donated, every hour volunteered, and every life touched is part of a single, unbroken thread: service as worship.
+              BAPS Charities operates as a registered 501(c)(3) nonprofit in the United States (EIN: 26-1530694) and a registered federal charity in Canada (CRA: 864015441RR0001), with sister organizations registered in nine countries across five continents — US, Canada, UK, South Africa, Kenya, Tanzania, Uganda, New Zealand, and Australia. Every dollar donated, every hour volunteered, and every life touched is part of a single, unbroken thread: service as worship.
             </p>
+            <div style={{ marginTop: 20, display: "flex", gap: 16 }}>
+              <a href="https://www.charitynavigator.org/ein/261530694" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", background: "#fff", border: "1px solid #E4DFDA", borderRadius: 4, textDecoration: "none" }}>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "#8E191D", lineHeight: 1 }}>97%</span>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2a241f" }}>Charity Navigator</div>
+                  <div style={{ fontSize: 11, color: "#7a716a" }}>Four-Star Rating</div>
+                </div>
+              </a>
+            </div>
             <div style={{ marginTop: 32, padding: 28, background: "#fff", borderLeft: "3px solid #8E191D" }}>
               <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 22, lineHeight: 1.5, color: "#2a241f" }}>"In the joy of others lies our own."</div>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginTop: 14 }}>— Pramukh Swami Maharaj</div>
             </div>
           </div>
-          <PhotoPlaceholder label="Pramukh Swami Maharaj — archival portrait" ratio="3/4" />
+          <div style={{ position: "relative", aspectRatio: "4/3", width: "100%", overflow: "hidden", borderRadius: 4 }}>
+            <Image
+              src="https://media.bapscharities.org/2023/07/23221910/ADL_Winter_Blanket_20230723_101154-1440x1080.jpg"
+              alt="BAPS Charities volunteers"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, 640px"
+            />
+          </div>
         </div>
       </section>
 
@@ -76,7 +94,7 @@ export default function AboutPage() {
       <section style={{ padding: "96px 32px", background: "#faf7f3" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginBottom: 20 }}>Our History</div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 44, lineHeight: 1.15, margin: 0, color: "#2a241f", maxWidth: 700 }}>25 years of quiet, persistent service.</h2>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 44, lineHeight: 1.15, margin: 0, color: "#2a241f", maxWidth: 700 }}>25 years of quiet, persistent service — across five continents.</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 32, marginTop: 56 }}>
             {TIMELINE.map(m => (
               <div key={m.year} style={{ borderTop: "2px solid #8E191D", paddingTop: 20 }}>
@@ -94,7 +112,27 @@ export default function AboutPage() {
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginBottom: 20 }}>Leadership</div>
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 44, lineHeight: 1.15, margin: 0, color: "#2a241f", maxWidth: 700 }}>Guided by spiritual leaders. Run by volunteers.</h2>
-          <p style={{ fontSize: 16, lineHeight: 1.75, color: "#4C4238", maxWidth: 680, marginTop: 20 }}>BAPS Charities North America is governed by a volunteer Board of Trustees and operated by 5,000+ volunteers across the United States and Canada. No paid staff. No overhead consultants.</p>
+          <p style={{ fontSize: 16, lineHeight: 1.75, color: "#4C4238", maxWidth: 680, marginTop: 20 }}>BAPS Charities North America is governed by a volunteer Board of Trustees and operated entirely by volunteers across the United States and Canada — 100+ US cities and 15 Canadian centres. No paid executive staff. No overhead consultants. Five focus areas: Health Awareness, Educational Services, Humanitarian Relief, Environmental Protection, and Community Empowerment.</p>
+          <div style={{ marginTop: 32, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, maxWidth: 720 }}>
+            <div style={{ padding: 24, background: "#fff", border: "1px solid #E4DFDA", borderLeft: "3px solid #8E191D" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8E191D", marginBottom: 10 }}>US Headquarters</div>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "#4C4238" }}>
+                <div>Robbinsville, NJ</div>
+                <div style={{ marginTop: 4 }}>EIN: 26-1530694</div>
+                <div style={{ marginTop: 4 }}>501(c)(3) nonprofit</div>
+                <div style={{ marginTop: 6 }}><a href="tel:+18882273881" style={{ color: "#4C4238", textDecoration: "none" }}>1-888-227-3881</a></div>
+              </div>
+            </div>
+            <div style={{ padding: 24, background: "#fff", border: "1px solid #E4DFDA", borderLeft: "3px solid #8E191D" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8E191D", marginBottom: 10 }}>Canada Office</div>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "#4C4238" }}>
+                <div>61 Claireville Drive</div>
+                <div>Toronto, Ontario M9W5Z7</div>
+                <div style={{ marginTop: 6 }}>CRA: 864015441RR0001</div>
+                <div>15 Canadian centres</div>
+              </div>
+            </div>
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 32, marginTop: 56 }}>
             {LEADERS.map(p => (
               <div key={p.name}>

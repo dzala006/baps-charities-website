@@ -1,10 +1,35 @@
 import type { Metadata } from "next";
 import PageShell from "../components/PageShell";
-import LocationPicker from "../components/LocationPicker";
+import FindACenterClient from "./FindACenterClient";
+import { supabase } from "../lib/supabase";
 
-export const metadata: Metadata = { title: "Find a Center — BAPS Charities" };
+export const metadata: Metadata = {
+  title: "Find a Center",
+  description: "Find your nearest BAPS center across 12 countries and 140+ cities worldwide.",
+};
 
-export default function FindACenterPage() {
+export const revalidate = 3600;
+
+async function getCenters() {
+  const { data } = await supabase
+    .from("centers")
+    .select("id, name, slug, city, state, region_id")
+    .order("state", { ascending: true })
+    .order("city", { ascending: true });
+  return data ?? [];
+}
+
+async function getRegions() {
+  const { data } = await supabase
+    .from("regions")
+    .select("id, name")
+    .order("name", { ascending: true });
+  return data ?? [];
+}
+
+export default async function FindACenterPage() {
+  const [centers, regions] = await Promise.all([getCenters(), getRegions()]);
+
   return (
     <PageShell>
       <section style={{ background: "#2a241f", color: "#fff", padding: "96px 32px 80px" }}>
@@ -14,22 +39,12 @@ export default function FindACenterPage() {
             Find a BAPS center near you.
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.65, color: "#b1aca7", maxWidth: 640, marginTop: 24 }}>
-            BAPS has centers in 12 countries across five continents. Find your nearest location to connect with your local community.
+            BAPS has {centers.length > 0 ? `${centers.length}+` : "over 100"} centers across the United States and beyond. Find your nearest location to connect with your local community.
           </p>
-          <div style={{ marginTop: 40, display: "flex", gap: 0, maxWidth: 640 }}>
-            <input
-              type="text"
-              placeholder="Enter city, state, or zip code"
-              style={{ flex: 1, padding: "18px 24px", background: "#fff", border: "none", borderRadius: "4px 0 0 4px", fontSize: 16, color: "#2a241f", outline: "none" }}
-            />
-            <button style={{ padding: "18px 28px", background: "#CF3728", color: "#fff", border: "none", borderRadius: "0 4px 4px 0", fontSize: 14, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer", whiteSpace: "nowrap" }}>
-              Search
-            </button>
-          </div>
         </div>
       </section>
 
-      <LocationPicker />
+      <FindACenterClient centers={centers} regions={regions} />
     </PageShell>
   );
 }
