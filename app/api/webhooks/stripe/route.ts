@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Stripe from "stripe";
-import { supabase } from "@/app/lib/supabase";
+import { supabaseAdmin } from "@/app/lib/supabase-admin";
 
 // ---------------------------------------------------------------------------
 // Lazy Stripe instance — only constructed on first request, not at build time
@@ -156,7 +156,7 @@ export async function POST(req: Request): Promise<Response> {
     const designation = pi.metadata?.designation ?? "General";
     const amountUsd = pi.amount / 100;
 
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from("donations")
       .upsert(
         {
