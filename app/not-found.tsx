@@ -1,57 +1,32 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "./components/PageShell";
+
+export const metadata: Metadata = { title: "Page Not Found | BAPS Charities" };
 
 export default function NotFound() {
   return (
     <PageShell>
-      <section style={{ background: "#faf7f3", minHeight: "70vh", display: "flex", alignItems: "center", padding: "64px 32px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", width: "100%" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 96, alignItems: "center" }}>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(80px, 15vw, 160px)", lineHeight: 1, color: "#E4DFDA", fontWeight: 400, letterSpacing: "-0.03em" }}>404</div>
-              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginBottom: 16, marginTop: 8 }}>Page not found</div>
-              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.1, margin: 0, color: "#2a241f" }}>
-                We couldn&apos;t find that page.
-              </h1>
-              <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", marginTop: 20, maxWidth: 480 }}>
-                The page you&apos;re looking for may have moved or no longer exists. Use the links below to find what you need.
-              </p>
-              <div style={{ marginTop: 40, display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Link
-                  href="/"
-                  style={{ padding: "14px 28px", background: "#8E191D", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none" }}
-                >
-                  Go Home
-                </Link>
-                <Link
-                  href="/find-a-center"
-                  style={{ padding: "14px 28px", background: "#fff", color: "#2a241f", border: "1px solid #c9c2bb", borderRadius: 4, fontSize: 13, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none" }}
-                >
-                  Find a Center
-                </Link>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {[
-                { label: "About Us", href: "/about", desc: "Our mission and history" },
-                { label: "Programs", href: "/programs", desc: "5 pillars of service" },
-                { label: "Events", href: "/events", desc: "Walk | Run 2026 and more" },
-                { label: "Donate", href: "/donate", desc: "Support our mission" },
-                { label: "Get Involved", href: "/get-involved", desc: "9 ways to help" },
-                { label: "Contact", href: "/contact", desc: "Get in touch" },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{ background: "#fff", border: "1px solid #E4DFDA", borderRadius: 4, padding: "18px 20px", textDecoration: "none", display: "block" }}
-                >
-                  <div style={{ fontWeight: 600, color: "#2a241f", fontSize: 14 }}>{item.label}</div>
-                  <div style={{ fontSize: 12, color: "#7a716a", marginTop: 4 }}>{item.desc}</div>
-                  <div style={{ fontSize: 11, color: "#8E191D", fontWeight: 600, marginTop: 8 }}>→</div>
-                </Link>
-              ))}
-            </div>
+      <section style={{ background: "#2a241f", color: "#fff", padding: "120px 32px 96px", textAlign: "center" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto" }}>
+          <div style={{ fontSize: 80, fontFamily: "var(--font-display)", color: "#CF3728", lineHeight: 1 }}>404</div>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "clamp(28px,3vw,42px)", margin: "16px 0 20px", color: "#fff" }}>
+            Page not found
+          </h1>
+          <p style={{ fontSize: 16, color: "#b1aca7", lineHeight: 1.7, marginBottom: 40 }}>
+            The page you are looking for may have moved or no longer exists.
+          </p>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+            {[
+              { href: "/", label: "Home" },
+              { href: "/donate", label: "Donate" },
+              { href: "/find-a-center", label: "Find a Center" },
+              { href: "/contact", label: "Contact" },
+            ].map(({ href, label }) => (
+              <Link key={href} href={href} style={{ padding: "12px 28px", background: href === "/donate" ? "#8E191D" : "transparent", color: "#fff", border: "1px solid " + (href === "/donate" ? "#8E191D" : "#5a4e47"), borderRadius: 4, textDecoration: "none", fontSize: 14, fontWeight: 600, letterSpacing: "0.05em" }}>
+                {label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
