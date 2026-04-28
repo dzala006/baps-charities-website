@@ -54,7 +54,7 @@ export default function DonatePage() {
                 textAlign: "center",
                 border: "1px solid #5a4e47"
               }}>
-                <div style={{ fontSize: 36, marginBottom: 16 }}>🤲</div>
+                <div style={{ width: 48, height: 3, background: "#CF3728", margin: "0 auto 24px" }} />
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "#fff", fontWeight: 400, margin: "0 0 12px" }}>
                   Donations coming soon
                 </h2>

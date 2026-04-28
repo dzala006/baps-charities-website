@@ -72,12 +72,14 @@ export default function ReportsPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
             <a href="https://media.bapscharities.org/2026/03/17155534/BAPSCharitiesAnnualReportUSA2025-1.pdf" target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#2a241f", color: "#fff", padding: 40, borderRadius: 4, textDecoration: "none" }}>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728", marginBottom: 12 }}>Latest · 2025 · USA</div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, lineHeight: 1.2, margin: "0 0 16px" }}>BAPS Charities Annual Report 2025 — USA</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 24, lineHeight: 1.2, margin: "0 0 12px" }}>BAPS Charities Annual Report 2025 — USA</h3>
+              <p style={{ fontSize: 13, color: "#b1aca7", lineHeight: 1.6, margin: "0 0 20px" }}>LA wildfire relief · food drives in 100+ cities · blood drives · health fairs · tree planting</p>
               <div style={{ padding: "10px 18px", background: "#CF3728", borderRadius: 4, fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", display: "inline-block" }}>Download PDF →</div>
             </a>
             <a href="https://media.bapscharities.org/2026/03/17155728/BAPSCharitiesAnnualReportCANADA2025-1.pdf" target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#4C4238", color: "#fff", padding: 40, borderRadius: 4, textDecoration: "none" }}>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728", marginBottom: 12 }}>Latest · 2025 · Canada</div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, lineHeight: 1.2, margin: "0 0 16px" }}>BAPS Charities Annual Report 2025 — Canada</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 24, lineHeight: 1.2, margin: "0 0 12px" }}>BAPS Charities Annual Report 2025 — Canada</h3>
+              <p style={{ fontSize: 13, color: "#b1aca7", lineHeight: 1.6, margin: "0 0 20px" }}>662,000+ lbs food donated · 15 Canadian centres · health awareness · community outreach</p>
               <div style={{ padding: "10px 18px", background: "#CF3728", borderRadius: 4, fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", display: "inline-block" }}>Download PDF →</div>
             </a>
           </div>
