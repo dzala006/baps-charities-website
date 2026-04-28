@@ -56,6 +56,10 @@ export default function TermsPage() {
       <section style={{ background: "#faf7f3", padding: "64px 32px 96px" }}>
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
 
+          <div style={{ background: "#fff8e1", border: "1px solid #f9a825", borderRadius: 4, padding: "12px 20px", marginBottom: 32, fontSize: 13, color: "#5d4037" }}>
+            <strong>DRAFT — pending org legal review.</strong> This policy has not yet been reviewed by BAPS Charities legal counsel. Do not treat as final.
+          </div>
+
           <h2
             style={{
               fontFamily: "var(--font-display)",
@@ -68,11 +72,13 @@ export default function TermsPage() {
             Use of Site
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
-            The BAPS Charities website is provided for informational purposes only. While we strive to
-            maintain accurate and up-to-date content, BAPS Charities makes no warranties — express or
-            implied — regarding the completeness, accuracy, reliability, or suitability of any
+            The BAPS Charities website is provided for informational and charitable purposes only. While
+            we strive to maintain accurate and up-to-date content, BAPS Charities makes no warranties —
+            express or implied — regarding the completeness, accuracy, reliability, or suitability of any
             information on this site. Your use of the site and reliance on any information contained
-            herein is solely at your own risk.
+            herein is solely at your own risk. You agree not to use this site for any unlawful purpose
+            and not to attempt unauthorized access to any portion of the site, its servers, or any
+            connected systems.
           </p>
 
           <h2
@@ -170,13 +176,37 @@ export default function TermsPage() {
               margin: "0 0 16px",
             }}
           >
+            Limitation of Liability
+          </h2>
+          <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
+            To the fullest extent permitted by applicable law, BAPS Charities, its officers, directors,
+            employees, and volunteers shall not be liable for any indirect, incidental, special,
+            consequential, or punitive damages — including but not limited to loss of data, loss of
+            revenue, or loss of goodwill — arising out of or in connection with your use of, or inability
+            to use, this website or any content or services provided through it, even if BAPS Charities
+            has been advised of the possibility of such damages. Our total aggregate liability for any
+            claim arising under these terms shall not exceed the amount you paid to BAPS Charities in
+            the twelve months preceding the claim.
+          </p>
+
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 400,
+              fontSize: 30,
+              color: "#2a241f",
+              margin: "0 0 16px",
+            }}
+          >
             Governing Law
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
             These Terms of Use shall be governed by and construed in accordance with the laws of the
-            State of New Jersey, without regard to its conflict of law provisions. Any disputes arising
-            under or related to these terms shall be subject to the exclusive jurisdiction of the courts
-            located in New Jersey.
+            United States and the State of New Jersey, without regard to conflict of law provisions.
+            Canadian visitors and donors are also subject to applicable Canadian federal and provincial
+            laws where required. Any disputes arising under or related to these terms shall be subject
+            to the jurisdiction of the courts located in New Jersey (for US users) or the applicable
+            provincial court in Canada (for Canadian users), as appropriate.
           </p>
 
           <div

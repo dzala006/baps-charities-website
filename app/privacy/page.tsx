@@ -56,6 +56,10 @@ export default function PrivacyPage() {
       <section style={{ background: "#faf7f3", padding: "64px 32px 96px" }}>
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
 
+          <div style={{ background: "#fff8e1", border: "1px solid #f9a825", borderRadius: 4, padding: "12px 20px", marginBottom: 32, fontSize: 13, color: "#5d4037" }}>
+            <strong>DRAFT — pending org legal review.</strong> This policy has not yet been reviewed by BAPS Charities legal counsel. Do not treat as final.
+          </div>
+
           <h2
             style={{
               fontFamily: "var(--font-display)",
@@ -117,17 +121,28 @@ export default function PrivacyPage() {
           </p>
           <ul style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px", paddingLeft: 24, display: "flex", flexDirection: "column", gap: 8 }}>
             <li>
-              <strong>Stripe</strong> — Payment processing. Your payment information is governed by
-              Stripe&apos;s Privacy Policy at stripe.com/privacy.
+              <strong>Stripe</strong> — Payment processing for donations. Your payment information is
+              collected and handled solely by Stripe; we never store card numbers on our servers. Subject
+              to Stripe&apos;s Privacy Policy at stripe.com/privacy.
             </li>
             <li>
-              <strong>Supabase</strong> — Secure cloud database hosting for donor and volunteer records.
+              <strong>Supabase</strong> — Secure cloud database and authentication (Supabase Auth).
+              User account credentials, session tokens, and donor/volunteer records are stored in
+              Supabase. Subject to Supabase&apos;s privacy policy at supabase.com/privacy.
+            </li>
+            <li>
+              <strong>Mailgun</strong> — Transactional email delivery for donation receipts,
+              confirmations, and notifications. Mailgun may process your email address and message
+              metadata. Subject to Mailgun&apos;s privacy policy at mailgun.com/privacy-policy.
             </li>
             <li>
               <strong>Vercel</strong> — Website hosting and edge delivery infrastructure.
             </li>
             <li>
-              <strong>Mailgun</strong> — Transactional email delivery for receipts and notifications.
+              <strong>Sentry</strong> — Error monitoring and performance tracking. Sentry may capture
+              limited request metadata (e.g., browser type, page URL, error stack traces) to help us
+              diagnose and fix issues. No payment or password data is sent to Sentry. Subject to
+              Sentry&apos;s privacy policy at sentry.io/privacy.
             </li>
           </ul>
           <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
@@ -144,15 +159,60 @@ export default function PrivacyPage() {
               margin: "0 0 16px",
             }}
           >
+            Cookies
+          </h2>
+          <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
+            We use session cookies to maintain your authenticated state when you log in to your BAPS
+            Charities account. These cookies are essential for the site to function and are deleted when
+            you close your browser or log out. We do not use advertising or cross-site tracking cookies.
+            If we introduce any optional analytics cookies in the future, we will update this policy and
+            request your consent where required by applicable law.
+          </p>
+
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 400,
+              fontSize: 30,
+              color: "#2a241f",
+              margin: "0 0 16px",
+            }}
+          >
+            Data Retention
+          </h2>
+          <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
+            We retain donor records — including name, contact information, and donation history — for
+            seven years following the date of donation to comply with applicable tax and charitable
+            reporting obligations. Contact form submissions and event registration data are retained for
+            up to two years unless you request earlier deletion. Account data is retained for as long as
+            your account is active. Upon a verified deletion request, we will remove or anonymize your
+            personal information within 30 days, except where retention is required by law.
+          </p>
+
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 400,
+              fontSize: 30,
+              color: "#2a241f",
+              margin: "0 0 16px",
+            }}
+          >
             Your Rights
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.7, color: "#4C4238", margin: "0 0 32px" }}>
             You have the right to access, correct, or request deletion of any personal information we
-            hold about you. To submit a request, please contact us at{" "}
+            hold about you, including your donation records and account data. To submit a privacy
+            request, please contact us at{" "}
+            <a href="mailto:info@bapscharities.org" style={{ color: "#8E191D", fontWeight: 600 }}>
+              info@bapscharities.org
+            </a>{" "}
+            or{" "}
             <a href="mailto:privacy@bapscharities.org" style={{ color: "#8E191D", fontWeight: 600 }}>
               privacy@bapscharities.org
             </a>
-            . We will respond to all verified requests within 30 days.
+            . We will respond to all verified requests within 30 days. You will not be discriminated
+            against for exercising your privacy rights.
           </p>
 
           <h2
