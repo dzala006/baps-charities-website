@@ -1,4 +1,5 @@
 import { supabase } from "@/app/lib/supabase";
+import { getNewsletterRatelimit } from "@/app/lib/ratelimit";
 
 async function sendWelcomeEmail(email: string): Promise<void> {
   const apiKey = process.env.MAILGUN_API_KEY;
@@ -59,6 +60,33 @@ async function sendWelcomeEmail(email: string): Promise<void> {
 }
 
 export async function POST(req: Request): Promise<Response> {
+  // Rate limit: 5 req/min per IP
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "anonymous";
+
+  const limiter = getNewsletterRatelimit();
+  if (limiter) {
+    const { success, limit, remaining, reset } = await limiter.limit(ip);
+    if (!success) {
+      return Response.json(
+        { error: "Too many requests. Please wait a minute and try again." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": String(limit),
+            "X-RateLimit-Remaining": String(remaining),
+            "X-RateLimit-Reset": String(reset),
+            "Retry-After": "60",
+          },
+        }
+      );
+    }
+  } else {
+    console.warn("[newsletter] Rate limiter not configured — UPSTASH_REDIS_REST_URL/TOKEN missing");
+  }
+
   let email: unknown;
   try {
     const body = await req.json();

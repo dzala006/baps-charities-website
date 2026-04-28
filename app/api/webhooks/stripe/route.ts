@@ -10,6 +10,14 @@ import { getSupabaseAdmin } from "@/app/lib/supabase-admin";
 
 let _stripe: Stripe | null = null;
 
+// ---------------------------------------------------------------------------
+// Signature failure tracking for Sentry alerting
+// ---------------------------------------------------------------------------
+
+let sigFailures: number[] = [];
+const SIG_FAILURE_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+const SIG_FAILURE_THRESHOLD = 3;
+
 function getStripe(): Stripe {
   if (!_stripe) {
     const key = process.env.STRIPE_SECRET_KEY;
@@ -121,6 +129,8 @@ async function sendReceiptEmail(params: {
 // ---------------------------------------------------------------------------
 
 export async function POST(req: Request): Promise<Response> {
+  console.log(`[stripe-webhook] Received: ${new Date().toISOString()}, sig=${req.headers.get("stripe-signature")?.slice(0, 20)}...`);
+
   if (!process.env.STRIPE_SECRET_KEY) {
     return new Response("Stripe not configured", { status: 503 });
   }
@@ -144,6 +154,19 @@ export async function POST(req: Request): Promise<Response> {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("Stripe webhook signature verification failed:", message);
+
+    // Track signature failures for alerting
+    const now = Date.now();
+    sigFailures = sigFailures.filter((t) => now - t < SIG_FAILURE_WINDOW_MS);
+    sigFailures.push(now);
+
+    if (sigFailures.length >= SIG_FAILURE_THRESHOLD) {
+      Sentry.captureMessage(
+        `Stripe webhook: ${sigFailures.length} signature failures in 5 minutes — possible replay attack`,
+        { level: "error", tags: { type: "stripe-sig-failure-flood" } }
+      );
+    }
+
     return new Response(`Webhook verification failed: ${message}`, {
       status: 400,
     });
