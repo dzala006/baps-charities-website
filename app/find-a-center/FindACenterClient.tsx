@@ -4,16 +4,16 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 
 type Center = {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   city: string;
   state: string;
-  region_id: number;
+  region_id: string;
 };
 
 type Region = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -24,7 +24,7 @@ type Props = {
 
 export default function FindACenterClient({ centers, regions }: Props) {
   const [query, setQuery] = useState("");
-  const [activeRegion, setActiveRegion] = useState<number | null>(null);
+  const [activeRegion, setActiveRegion] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -38,10 +38,15 @@ export default function FindACenterClient({ centers, regions }: Props) {
   const byState = useMemo(() => {
     const map: Record<string, Center[]> = {};
     for (const c of filtered) {
-      if (!map[c.state]) map[c.state] = [];
-      map[c.state].push(c);
+      const key = c.state || "Other";
+      if (!map[key]) map[key] = [];
+      map[key].push(c);
     }
-    return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
+    return Object.entries(map).sort(([a], [b]) => {
+      if (a === "Other") return 1;
+      if (b === "Other") return -1;
+      return a.localeCompare(b);
+    });
   }, [filtered]);
 
   return (
@@ -109,7 +114,7 @@ export default function FindACenterClient({ centers, regions }: Props) {
                       href={`/centers/${c.slug}`}
                       style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 4, color: "#2a241f", textDecoration: "none", background: "#fff", border: "1px solid #E4DFDA", fontSize: 14 }}
                     >
-                      <span style={{ fontWeight: 500 }}>{c.city}</span>
+                      <span style={{ fontWeight: 500 }}>{c.city || c.name}</span>
                       <span style={{ fontSize: 11, color: "#8E191D", fontWeight: 600 }}>View →</span>
                     </Link>
                   ))}
