@@ -159,10 +159,11 @@ export async function POST(req: Request): Promise<Response> {
     const now = Date.now();
     sigFailures = sigFailures.filter((t) => now - t < SIG_FAILURE_WINDOW_MS);
     sigFailures.push(now);
+    if (sigFailures.length > 100) sigFailures = sigFailures.slice(-100); // hard cap
 
-    if (sigFailures.length >= SIG_FAILURE_THRESHOLD) {
+    if (sigFailures.length === SIG_FAILURE_THRESHOLD) {
       Sentry.captureMessage(
-        `Stripe webhook: ${sigFailures.length} signature failures in 5 minutes — possible replay attack`,
+        `Stripe webhook: ${SIG_FAILURE_THRESHOLD} signature failures in 5 minutes — possible replay attack`,
         { level: "error", tags: { type: "stripe-sig-failure-flood" } }
       );
     }

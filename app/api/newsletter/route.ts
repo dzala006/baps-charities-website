@@ -61,9 +61,11 @@ async function sendWelcomeEmail(email: string): Promise<void> {
 
 export async function POST(req: Request): Promise<Response> {
   // Rate limit: 5 req/min per IP
+  // On Vercel, x-real-ip is platform-injected and cannot be spoofed by clients.
+  // x-forwarded-for is client-influenced (Vercel prepends but clients can add entries).
   const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     "anonymous";
 
   const limiter = getNewsletterRatelimit();
