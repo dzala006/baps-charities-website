@@ -156,19 +156,25 @@ export async function POST(req: Request): Promise<Response> {
     const designation = pi.metadata?.designation ?? "General";
     const amountUsd = pi.amount / 100;
 
-    const { error: dbError } = await supabase.from("donations").insert({
-      stripe_payment_id: pi.id,
-      amount_cents: pi.amount,
-      amount_usd: amountUsd,
-      currency: pi.currency,
-      designation,
-      donor_email: donorEmail,
-      donor_name: donorName,
-      created_at: new Date().toISOString(),
-    });
+    const { error: dbError } = await supabase
+      .from("donations")
+      .upsert(
+        {
+          stripe_payment_id: pi.id,
+          amount_cents: pi.amount,
+          amount_usd: amountUsd,
+          currency: pi.currency,
+          designation,
+          donor_email: donorEmail,
+          donor_name: donorName,
+          created_at: new Date().toISOString(),
+        },
+        { onConflict: "stripe_payment_id", ignoreDuplicates: true }
+      );
 
     if (dbError) {
       console.error("Failed to insert donation into Supabase:", dbError);
+      // Don't return an error response — Stripe should not retry for a DB error
     }
 
     if (donorEmail) {
