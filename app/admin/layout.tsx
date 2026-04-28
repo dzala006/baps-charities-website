@@ -38,13 +38,17 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  const { data: roleRow } = await supabase
-    .from("user_roles")
-    .select("role")
+  // P4 (scoped roles): admin gate now reads user_role_assignments. The legacy
+  // user_roles table is still present (bridge period) but unauthoritative.
+  // See ../../baps-walkathon-portal/docs/SCOPED_ROLES_DESIGN.md.
+  const { data: assignment } = await supabase
+    .from("user_role_assignments")
+    .select("id")
     .eq("user_id", user.id)
-    .single();
+    .eq("role", "national_admin")
+    .maybeSingle();
 
-  if (!roleRow || roleRow.role !== "admin") {
+  if (!assignment) {
     redirect("/login");
   }
 
