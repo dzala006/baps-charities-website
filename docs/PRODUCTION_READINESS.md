@@ -22,6 +22,7 @@ _Updated: 2026-04-27_
 - [ ] **9. Privacy + Terms** — real text, DRAFT disclaimer
 - [ ] **10. Backup runbook** — PITR note, restore test
 - [ ] **11. Accessibility** — axe AA pass, keyboard nav
+  > To run axe: start dev server (`npm run dev`), open any public page in Chrome — axe violations appear in the browser console. Target: zero AA violations before go-live. Manual keyboard nav check: tab through Home and Donate, verify focus is visible and logical.
 - [ ] **12. Cross-browser + mobile** — Safari/Chrome/Firefox
 - [ ] **13. UX polish** — 404, cookie banner, sticky Donate
 - [ ] **14. /healthz endpoint** — Supabase+Stripe+Mailgun health check
