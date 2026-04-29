@@ -21,15 +21,21 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+
+  // Close the drawer on route change. Setting state during render (rather
+  // than in an effect) is the React 19 idiom for derived state and avoids
+  // the cascading-render lint warning.
+  if (pathname !== previousPathname) {
+    setPreviousPathname(pathname);
+    setMenuOpen(false);
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Close drawer on route change
-  useEffect(() => { setMenuOpen(false); }, [pathname]);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
