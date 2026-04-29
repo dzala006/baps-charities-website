@@ -7,6 +7,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import { supabase } from "../../lib/supabase";
 import { sanitizeAboutHtml, isSafeUrl } from "../../lib/sanitizeAbout";
 import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "../../lib/featureFlags";
+import { getActiveWalkathon, resolveRegistrationCta } from "../../lib/walkathon";
 
 export const revalidate = 3600;
 
@@ -215,11 +216,21 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
   const center = await getCenterBySlug(slug);
   if (!center) notFound();
 
-  const [walkStats, centerEvents, pageContent] = await Promise.all([
+  const [walkStats, centerEvents, pageContent, activeWalkathon] = await Promise.all([
     getWalkStats(center.id),
     getCenterEvents(String(center.id)),
     getCenterPageContent(String(center.id)),
+    getActiveWalkathon(),
   ]);
+
+  const walkCta = resolveRegistrationCta(
+    activeWalkathon,
+    center.slug,
+    FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE,
+  );
+  const walkLabel = activeWalkathon
+    ? activeWalkathon.name.replace(/^Walk\s+/, "Walk | Run ")
+    : "Walk | Run 2026";
 
   // Hero override: editable hero takes precedence over the static
   // center.photo_url. Falls back to the static one if the coordinator
@@ -463,17 +474,17 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            {/* Walk 2026 CTA */}
+            {/* Active Walkathon CTA — sourced from walkathons.registration_url */}
             <div style={{ background: "#2a241f", color: "#fff", borderRadius: 4, padding: 28 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>Walk | Run 2026</div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>{walkLabel}</div>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 22, margin: "8px 0 12px", lineHeight: 1.2 }}>Walk with us in {center.city}</h3>
               <div style={{ fontSize: 14, color: "#b1aca7", lineHeight: 1.7, marginBottom: 20 }}>
                 The annual 3K community walk/run · $15 per person · All ages · Free parking
               </div>
               <a
-                href={FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE ? `/register/${center.slug}` : "https://walk2026.na.bapscharities.org"}
-                target={FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE ? undefined : "_blank"}
-                rel={FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE ? undefined : "noopener noreferrer"}
+                href={walkCta.href}
+                target={walkCta.target}
+                rel={walkCta.rel}
                 style={{ display: "block", padding: "14px 0", background: "#CF3728", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", textAlign: "center" }}
               >
                 Register Now →
