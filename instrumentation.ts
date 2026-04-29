@@ -27,6 +27,5 @@ function assertProductionRateLimitsConfigured(): void {
     // function will not start.
     throw new Error(msg);
   }
-  // eslint-disable-next-line no-console
   console.warn(msg);
 }
