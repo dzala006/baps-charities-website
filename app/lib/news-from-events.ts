@@ -14,6 +14,26 @@ import type { Article } from "./news-data";
 
 const SLUG_PREFIX = "chapter-";
 
+// Fallback hero image when an imported chapter event has no photo_url. Lives
+// on the BAPS-owned media CDN and is referenced from a single place so a
+// future asset rotation only requires touching this constant.
+const FALLBACK_HERO_IMAGE =
+  "https://media.bapscharities.org/2026/01/23113836/Embrace-the-Spirit-of-Service-Walk-for-Your-Community.jpg";
+
+// Shape after Supabase's PostgREST join: `centers(...)` arrives as a one-row
+// array even though the FK is 1:1. We normalise it to a single object inside
+// `normaliseRow` below so the rest of the module can keep using a flat shape.
+interface CenterEventRowFromSupabase {
+  slug: string;
+  title: string;
+  event_type: string | null;
+  event_date: string | null;
+  description: string | null;
+  body: string | null;
+  photo_url: string | null;
+  centers: Array<{ slug: string; city: string; state: string; name: string }> | { slug: string; city: string; state: string; name: string } | null;
+}
+
 interface CenterEventRow {
   slug: string;
   title: string;
@@ -22,9 +42,25 @@ interface CenterEventRow {
   description: string | null;
   body: string | null;
   photo_url: string | null;
-  external_url: string | null;
   centers: { slug: string; city: string; state: string; name: string } | null;
 }
+
+function normaliseRow(row: CenterEventRowFromSupabase): CenterEventRow {
+  const centers = Array.isArray(row.centers) ? row.centers[0] ?? null : row.centers;
+  return {
+    slug: row.slug,
+    title: row.title,
+    event_type: row.event_type,
+    event_date: row.event_date,
+    description: row.description,
+    body: row.body,
+    photo_url: row.photo_url,
+    centers,
+  };
+}
+
+const ROW_SELECT =
+  "slug, title, event_type, event_date, description, body, photo_url, centers(slug, city, state, name)";
 
 function categoryFor(row: CenterEventRow): string {
   const t = (row.event_type || "").toLowerCase();
@@ -72,7 +108,7 @@ function rowToArticle(row: CenterEventRow): Article {
     excerpt: desc ? (desc.length > 220 ? desc.slice(0, 217).trimEnd() + "…" : desc) : `${center?.name ?? ""} chapter activity.`,
     read: readTimeFor(bodyWithFooter.join(" ")),
     body: bodyWithFooter.length ? bodyWithFooter : ["No additional details were captured for this activity."],
-    image: row.photo_url || "https://media.bapscharities.org/2026/01/23113836/Embrace-the-Spirit-of-Service-Walk-for-Your-Community.jpg",
+    image: row.photo_url || FALLBACK_HERO_IMAGE,
   };
 }
 
@@ -85,12 +121,13 @@ export async function getChapterArticles(): Promise<Article[]> {
   try {
     const { data, error } = await supabase
       .from("center_events")
-      .select("slug, title, event_type, event_date, description, body, photo_url, external_url, centers(slug, city, state, name)")
+      .select(ROW_SELECT)
       .eq("source", "legacy-import")
       .eq("is_published", true)
       .order("event_date", { ascending: false });
     if (error || !data) return [];
-    return (data as unknown as CenterEventRow[]).map(rowToArticle);
+    const rows = data as unknown as CenterEventRowFromSupabase[];
+    return rows.map(normaliseRow).map(rowToArticle);
   } catch {
     return [];
   }
@@ -110,14 +147,13 @@ export async function getChapterArticleBySlug(slug: string): Promise<Article | n
   try {
     const { data, error } = await supabase
       .from("center_events")
-      .select("slug, title, event_type, event_date, description, body, photo_url, external_url, centers(slug, city, state, name)")
+      .select(ROW_SELECT)
       .eq("slug", eventSlug)
       .eq("source", "legacy-import")
-      .eq("is_published", true)
-      .limit(20);
+      .eq("is_published", true);
     if (error || !data) return null;
-    const rows = data as unknown as CenterEventRow[];
-    const match = rows.find(r => r.centers?.slug === centerSlug);
+    const rows = (data as unknown as CenterEventRowFromSupabase[]).map(normaliseRow);
+    const match = rows.find((r) => r.centers?.slug === centerSlug);
     return match ? rowToArticle(match) : null;
   } catch {
     return null;
