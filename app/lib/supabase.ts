@@ -33,3 +33,12 @@ export type Center = {
   phone: string | null;
   email: string | null;
 };
+
+export type Walkathon = {
+  id: string;
+  year: number;
+  name: string;
+  status: string;
+  national_event_date: string;
+  registration_url: string | null;
+};
