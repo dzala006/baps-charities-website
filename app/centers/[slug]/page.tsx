@@ -5,8 +5,109 @@ import Image from "next/image";
 import PageShell from "../../components/PageShell";
 import Breadcrumb from "../../components/Breadcrumb";
 import { supabase } from "../../lib/supabase";
+import { sanitizeAboutHtml, isSafeUrl } from "../../lib/sanitizeAbout";
+import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "../../lib/featureFlags";
 
 export const revalidate = 3600;
+
+// ----- Editable center page content -----------------------------------------
+
+type CenterPageEvent = {
+  title: string;
+  date: string | null;
+  location: string | null;
+  link: string | null;
+};
+
+type CenterPageContact = {
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  hours: string | null;
+};
+
+type CenterPageCustomLink = { label: string; url: string };
+
+type CenterPageContent = {
+  heroImageUrl: string | null;
+  aboutHtmlClean: string; // already sanitized
+  upcomingEvents: CenterPageEvent[];
+  contact: CenterPageContact;
+  customLinks: CenterPageCustomLink[];
+  galleryImageUrls: string[];
+};
+
+function asEvent(raw: unknown): CenterPageEvent | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  return {
+    title: typeof r.title === "string" ? r.title : "",
+    date: typeof r.date === "string" ? r.date : null,
+    location: typeof r.location === "string" ? r.location : null,
+    link: typeof r.link === "string" && isSafeUrl(r.link) ? r.link : null,
+  };
+}
+
+function asCustomLink(raw: unknown): CenterPageCustomLink | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.url !== "string" || !isSafeUrl(r.url)) return null;
+  return { label: typeof r.label === "string" ? r.label : "", url: r.url };
+}
+
+function asContact(raw: unknown): CenterPageContact {
+  if (!raw || typeof raw !== "object") {
+    return { phone: null, email: null, address: null, hours: null };
+  }
+  const r = raw as Record<string, unknown>;
+  return {
+    phone: typeof r.phone === "string" ? r.phone : null,
+    email: typeof r.email === "string" ? r.email : null,
+    address: typeof r.address === "string" ? r.address : null,
+    hours: typeof r.hours === "string" ? r.hours : null,
+  };
+}
+
+async function getCenterPageContent(
+  centerId: string,
+): Promise<CenterPageContent | null> {
+  const { data } = await supabase
+    .from("center_pages")
+    .select(
+      "hero_image_url, about_html, upcoming_events, contact_block, custom_links, gallery_image_urls",
+    )
+    .eq("center_id", centerId)
+    .maybeSingle();
+
+  if (!data) return null;
+  const row = data as {
+    hero_image_url: string | null;
+    about_html: string | null;
+    upcoming_events: unknown;
+    contact_block: unknown;
+    custom_links: unknown;
+    gallery_image_urls: string[] | null;
+  };
+  return {
+    heroImageUrl:
+      row.hero_image_url && isSafeUrl(row.hero_image_url)
+        ? row.hero_image_url
+        : null,
+    aboutHtmlClean: sanitizeAboutHtml(row.about_html),
+    upcomingEvents: Array.isArray(row.upcoming_events)
+      ? (row.upcoming_events
+          .map(asEvent)
+          .filter((e): e is CenterPageEvent => e !== null))
+      : [],
+    contact: asContact(row.contact_block),
+    customLinks: Array.isArray(row.custom_links)
+      ? row.custom_links
+          .map(asCustomLink)
+          .filter((l): l is CenterPageCustomLink => l !== null)
+      : [],
+    galleryImageUrls: (row.gallery_image_urls ?? []).filter(isSafeUrl),
+  };
+}
 
 type CenterEvent = {
   id: string;
@@ -114,10 +215,25 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
   const center = await getCenterBySlug(slug);
   if (!center) notFound();
 
-  const [walkStats, centerEvents] = await Promise.all([
+  const [walkStats, centerEvents, pageContent] = await Promise.all([
     getWalkStats(center.id),
     getCenterEvents(String(center.id)),
+    getCenterPageContent(String(center.id)),
   ]);
+
+  // Hero override: editable hero takes precedence over the static
+  // center.photo_url. Falls back to the static one if the coordinator
+  // hasn't uploaded anything yet.
+  const heroImageUrl =
+    pageContent?.heroImageUrl ??
+    center.photo_url ??
+    "https://media.bapscharities.org/2026/01/15014830/DP1_6670-1024x683.jpg";
+
+  // Contact block: editable values override center.* fields when present.
+  const contactPhone = pageContent?.contact.phone ?? center.phone;
+  const contactEmail = pageContent?.contact.email ?? center.email;
+  const contactAddress = pageContent?.contact.address ?? center.address;
+  const contactHours = pageContent?.contact.hours ?? null;
 
   return (
     <PageShell>
@@ -148,7 +264,7 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px 0" }}>
           <div style={{ position: "relative", aspectRatio: "16/5", width: "100%", overflow: "hidden", background: "#c9bdb1" }}>
             <Image
-              src={center.photo_url ?? "https://media.bapscharities.org/2026/01/15014830/DP1_6670-1024x683.jpg"}
+              src={heroImageUrl}
               alt={`${center.name} BAPS Center`}
               fill
               style={{ objectFit: "cover", opacity: 0.7 }}
@@ -162,9 +278,49 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 64 }}>
           <div>
             <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36, color: "#2a241f", margin: "0 0 32px" }}>About this center</h2>
-            <p style={{ fontSize: 16, lineHeight: 1.75, color: "#4C4238" }}>
-              The BAPS center in {center.city} is part of a network of over 100 centers across North America, each serving its local community through health, education, environmental, and humanitarian programs — all powered by volunteers.
-            </p>
+            {pageContent?.aboutHtmlClean ? (
+              // Already sanitized through DOMPurify in sanitizeAboutHtml().
+              <div
+                className="center-about-rich"
+                style={{ fontSize: 16, lineHeight: 1.75, color: "#4C4238" }}
+                dangerouslySetInnerHTML={{ __html: pageContent.aboutHtmlClean }}
+              />
+            ) : (
+              <p style={{ fontSize: 16, lineHeight: 1.75, color: "#4C4238" }}>
+                The BAPS center in {center.city} is part of a network of over 100 centers across North America, each serving its local community through health, education, environmental, and humanitarian programs — all powered by volunteers.
+              </p>
+            )}
+
+            {pageContent && pageContent.upcomingEvents.length > 0 && (
+              <div style={{ marginTop: 48 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32, color: "#2a241f", margin: "0 0 24px" }}>
+                  Upcoming events
+                </h2>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 0 }}>
+                  {pageContent.upcomingEvents.map((ev, i) => (
+                    <li key={i} style={{ padding: "16px 0", borderBottom: "1px solid #E4DFDA" }}>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#2a241f", marginBottom: 4 }}>
+                        {ev.title || "(untitled)"}
+                      </div>
+                      <div style={{ fontSize: 13, color: "#7a716a", display: "flex", gap: 16, flexWrap: "wrap" }}>
+                        {ev.date && <span>{ev.date}</span>}
+                        {ev.location && <span>{ev.location}</span>}
+                        {ev.link && (
+                          <a
+                            href={ev.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#8E191D" }}
+                          >
+                            Details →
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {walkStats.length > 0 && (
               <>
@@ -258,7 +414,7 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b1aca7", marginBottom: 4 }}>Location</div>
                   <div style={{ fontSize: 14, color: "#4C4238" }}>{center.city}, {center.state}</div>
-                  {center.address && <div style={{ fontSize: 13, color: "#7a716a", marginTop: 2 }}>{center.address}</div>}
+                  {contactAddress && <div style={{ fontSize: 13, color: "#7a716a", marginTop: 2 }}>{contactAddress}</div>}
                 </div>
                 {center.regions?.name && (
                   <div>
@@ -266,20 +422,46 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
                     <div style={{ fontSize: 14, color: "#4C4238" }}>{center.regions.name}</div>
                   </div>
                 )}
-                {center.email && (
+                {contactEmail && (
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b1aca7", marginBottom: 4 }}>Email</div>
-                    <a href={`mailto:${center.email}`} style={{ fontSize: 14, color: "#8E191D" }}>{center.email}</a>
+                    <a href={`mailto:${contactEmail}`} style={{ fontSize: 14, color: "#8E191D" }}>{contactEmail}</a>
                   </div>
                 )}
-                {center.phone && (
+                {contactPhone && (
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b1aca7", marginBottom: 4 }}>Phone</div>
-                    <a href={`tel:${center.phone}`} style={{ fontSize: 14, color: "#8E191D" }}>{center.phone}</a>
+                    <a href={`tel:${contactPhone}`} style={{ fontSize: 14, color: "#8E191D" }}>{contactPhone}</a>
+                  </div>
+                )}
+                {contactHours && (
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b1aca7", marginBottom: 4 }}>Hours</div>
+                    <div style={{ fontSize: 14, color: "#4C4238" }}>{contactHours}</div>
                   </div>
                 )}
               </div>
             </div>
+
+            {pageContent && pageContent.customLinks.length > 0 && (
+              <div style={{ background: "#fff", border: "1px solid #E4DFDA", borderRadius: 4, padding: 24 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#7a716a", marginBottom: 16 }}>Links</div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                  {pageContent.customLinks.map((l, i) => (
+                    <li key={i}>
+                      <a
+                        href={l.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: 14, color: "#8E191D" }}
+                      >
+                        {l.label || l.url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Walk 2026 CTA */}
             <div style={{ background: "#2a241f", color: "#fff", borderRadius: 4, padding: 28 }}>
@@ -289,9 +471,9 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
                 The annual 3K community walk/run · $15 per person · All ages · Free parking
               </div>
               <a
-                href="https://walk2026.na.bapscharities.org"
-                target="_blank"
-                rel="noopener noreferrer"
+                href={FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE ? `/register/${center.slug}` : "https://walk2026.na.bapscharities.org"}
+                target={FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE ? undefined : "_blank"}
+                rel={FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE ? undefined : "noopener noreferrer"}
                 style={{ display: "block", padding: "14px 0", background: "#CF3728", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", textAlign: "center" }}
               >
                 Register Now →
@@ -312,6 +494,35 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
           </aside>
         </div>
       </section>
+
+      {pageContent && pageContent.galleryImageUrls.length > 0 && (
+        <section style={{ padding: "48px 32px", background: "#faf7f3", borderTop: "1px solid #E4DFDA" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8E191D", marginBottom: 20 }}>
+              Gallery
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: 16,
+              }}
+            >
+              {pageContent.galleryImageUrls.map((url, i) => (
+                <div key={i} style={{ position: "relative", aspectRatio: "1 / 1", background: "#E4DFDA", borderRadius: 4, overflow: "hidden" }}>
+                  {/* Native <img> rather than next/image because storage signed URLs aren't on the next.config remotePatterns whitelist. */}
+                  <img
+                    src={url}
+                    alt=""
+                    loading="lazy"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {center.address && (
         <section style={{ padding: "48px 32px", background: "#faf7f3", borderTop: "1px solid #E4DFDA" }}>

@@ -21,13 +21,15 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: roleRow } = await supabase
-    .from("user_roles")
-    .select("role")
+  // P4 (scoped roles): admin gate reads user_role_assignments
+  const { data: assignment } = await supabase
+    .from("user_role_assignments")
+    .select("id")
     .eq("user_id", session.user.id)
-    .single();
+    .eq("role", "national_admin")
+    .maybeSingle();
 
-  if (!roleRow || roleRow.role !== "admin") {
+  if (!assignment) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

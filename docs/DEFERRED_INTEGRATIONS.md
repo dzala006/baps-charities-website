@@ -47,7 +47,7 @@ stripe trigger payment_intent.succeeded
 
 ## Mailgun (Transactional Email)
 
-**Status:** Deferred — newsletter signups are stored in Supabase but no email is sent. Welcome email is logged to console.
+**Status:** Deferred — newsletter signups are stored in Supabase but no email is sent. Welcome email is logged to console. **Walkathon registration confirmation emails (P6-NEW)** also go through Mailgun; without keys, the row is still inserted and a `[mailgun] ... — skipping email` log line is emitted. See `docs/MAILGUN_ACTIVATION_RUNBOOK.md` for the full runbook.
 
 ### Env vars to set in Vercel
 
@@ -91,6 +91,15 @@ After adding DNS records, verify in Mailgun Dashboard → Sending → Domains �
 3. Confirm the email is received within 2 minutes.
 4. Check Mailgun Dashboard → Logs to confirm delivery status = `delivered`.
 5. Hit `GET /api/admin/mailgun-test` (admin-only) to send a test email and see the delivery API response.
+6. **P6-NEW:** with `NEXT_PUBLIC_FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE=true`, complete a walkathon registration end-to-end (`/register/<center-slug>`); confirm the registration row hits Supabase AND a confirmation email is delivered.
+
+---
+
+## Multi-center cities (P7-MULTI-CENTER)
+
+**Status:** Deferred — for cities that cover multiple BAPS centers (NJ Edison/Parsippany/Robbinsville, NY, TX, CA), `/events/walk-run-2026/[city]` currently routes to a single center via `walk_cities.slug == centers.slug`. A picker that lets users choose between centers in the same metro is planned for P7.
+
+No env var to flip — purely a UX layer to add. Until then, multi-center cities deep-link to the first matching center, which is acceptable for the seeded set today (most cities are 1:1).
 
 ---
 

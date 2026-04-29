@@ -4,6 +4,7 @@ import Link from "next/link";
 import PageShell from "../../../components/PageShell";
 import Breadcrumb from "../../../components/Breadcrumb";
 import { supabase } from "../../../lib/supabase";
+import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "../../../lib/featureFlags";
 
 export const revalidate = 3600;
 
@@ -56,7 +57,14 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
   const city = await getCityBySlug(slug);
   if (!city) notFound();
 
-  const registerUrl = city.registration_url ?? "https://walk2026.na.bapscharities.org";
+  // When the website hosts registration, link to the in-site form using the
+  // city slug (which today matches the center slug — see
+  // docs/REGISTRATION_MIGRATION_DESIGN.md §4.4 for the multi-center
+  // deferral). Otherwise fall back to the legacy cross-domain portal link.
+  const registerUrl = FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE
+    ? `/register/${city.slug}`
+    : (city.registration_url ?? "https://walk2026.na.bapscharities.org");
+  const registerOpensExternal = !FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE;
 
   return (
     <PageShell>
@@ -94,8 +102,8 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
           <div style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a
               href={registerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={registerOpensExternal ? "_blank" : undefined}
+              rel={registerOpensExternal ? "noopener noreferrer" : undefined}
               style={{ padding: "16px 32px", background: "#8E191D", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", display: "inline-block" }}
             >
               Register Now →
@@ -153,11 +161,11 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
               </div>
               <a
                 href={registerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={registerOpensExternal ? "_blank" : undefined}
+                rel={registerOpensExternal ? "noopener noreferrer" : undefined}
                 style={{ display: "block", padding: "15px 0", background: "#CF3728", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", textAlign: "center" }}
               >
-                Register at walk2026.na.bapscharities.org →
+                {registerOpensExternal ? "Register at walk2026.na.bapscharities.org →" : `Register for ${city.city} →`}
               </a>
             </div>
 
