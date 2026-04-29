@@ -5,6 +5,7 @@ import Image from "next/image";
 import PageShell from "../../components/PageShell";
 import Breadcrumb from "../../components/Breadcrumb";
 import { ARTICLES, getArticleBySlug } from "../../lib/news-data";
+import { getChapterArticleBySlug } from "../../lib/news-from-events";
 
 const CAT_COLORS: Record<string, string> = {
   Health: "#8E191D",
@@ -21,7 +22,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = getArticleBySlug(slug) ?? (await getChapterArticleBySlug(slug));
   if (!article) return { title: "Article Not Found" };
   return {
     title: article.title,
@@ -34,7 +35,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  // Static curated articles take precedence; fall back to the legacy-import
+  // chapter feed (slug prefixed `chapter-<centerSlug>__<eventSlug>`).
+  const article = getArticleBySlug(slug) ?? (await getChapterArticleBySlug(slug));
   if (!article) notFound();
 
   const color = CAT_COLORS[article.cat] ?? "#8E191D";

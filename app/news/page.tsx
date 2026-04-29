@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import PageShell from "../components/PageShell";
 import Breadcrumb from "../components/Breadcrumb";
-import { ARTICLES } from "../lib/news-data";
+import { ARTICLES, type Article } from "../lib/news-data";
+import { getChapterArticles } from "../lib/news-from-events";
 import NewsFilter from "./NewsFilter";
 
 export const metadata: Metadata = {
@@ -10,7 +11,19 @@ export const metadata: Metadata = {
     "Stories from the field — health, environment, education, humanitarian, and community news from BAPS Charities.",
 };
 
-export default function NewsPage() {
+// Sort by parsed date descending; entries without a parseable date sink
+// to the bottom but still render.
+function dateRank(a: Article): number {
+  const t = Date.parse(a.date);
+  return isNaN(t) ? 0 : t;
+}
+
+export default async function NewsPage() {
+  const chapter = await getChapterArticles();
+  // De-dup by slug if the static list ever overlaps with chapter feeds.
+  const seen = new Set<string>(ARTICLES.map(a => a.slug));
+  const additions = chapter.filter(a => !seen.has(a.slug));
+  const merged = [...ARTICLES, ...additions].sort((a, b) => dateRank(b) - dateRank(a));
   return (
     <PageShell>
       <section
@@ -53,7 +66,7 @@ export default function NewsPage() {
 
       <section style={{ padding: "56px 32px 96px", background: "#faf7f3" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <NewsFilter articles={ARTICLES} />
+          <NewsFilter articles={merged} />
         </div>
       </section>
     </PageShell>
