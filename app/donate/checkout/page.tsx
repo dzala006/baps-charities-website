@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, Suspense } from "react";
+import { useState, useTransition, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -94,16 +94,7 @@ const PROGRAMS = [
   { name: "Community Empowerment", sub: "Skill-building, mentorship, and community development programs" },
 ];
 
-function SummaryRow({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: 16, padding: "16px 24px", borderBottom: `1px solid ${D_LINE}`, alignItems: "center" }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: D_MUTED, letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
-      <div style={{ fontSize: emphasis ? 22 : 14, color: D_INK, fontFamily: emphasis ? "var(--font-display)" : "inherit" }}>{value}</div>
-    </div>
-  );
-}
-
-function StripePaymentForm({ clientSecret, onSuccess, amount, designation, monthly }: { clientSecret: string; onSuccess: (name: string, email: string) => void; amount: number; designation: string; monthly: boolean }) {
+function StripePaymentForm({ clientSecret, onSuccess, amount, monthly }: { clientSecret: string; onSuccess: (name: string, email: string) => void; amount: number; monthly: boolean }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isPending, startTransition] = useTransition();
@@ -350,7 +341,6 @@ function CheckoutInner() {
             <StripePaymentForm
               clientSecret={clientSecret}
               amount={total}
-              designation={PROGRAMS[designation].name}
               monthly={monthly}
               onSuccess={(name, email) => { setDonorName(name); setDonorEmail(email); setStep(4); }}
             />
