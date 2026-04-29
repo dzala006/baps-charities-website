@@ -5,7 +5,7 @@ import { submitRegistration } from "./actions";
 import {
   ageFromDob,
   classifyMinor,
-  SHIRT_SIZES,
+  SHIRT_SIZE_GROUPS,
   validateRegistration,
   type FormInput,
 } from "@/app/lib/registrationValidation";
@@ -163,7 +163,7 @@ export default function RegisterForm({
             name="shirtSize"
             label="Shirt size"
             required
-            options={SHIRT_SIZES}
+            optgroups={SHIRT_SIZE_GROUPS}
             value={form.shirtSize}
             onChange={(v) => update("shirtSize", v)}
             error={errors.shirtSize}
@@ -331,7 +331,8 @@ function SelectField(props: {
   name: string;
   label: string;
   required?: boolean;
-  options: readonly string[];
+  options?: readonly string[];
+  optgroups?: ReadonlyArray<{ label: string; options: readonly string[] }>;
   value: string;
   onChange: (v: string) => void;
   error?: string;
@@ -354,11 +355,21 @@ function SelectField(props: {
         style={inputStyle}
       >
         <option value="">Select…</option>
-        {props.options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
+        {props.optgroups
+          ? props.optgroups.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.options.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </optgroup>
+            ))
+          : (props.options ?? []).map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
       </select>
       {props.error && (
         <p id={`${props.id}-error`} role="alert" style={fieldErrorStyle}>

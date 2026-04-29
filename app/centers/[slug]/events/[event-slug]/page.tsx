@@ -5,6 +5,7 @@ import Image from "next/image";
 import PageShell from "../../../../components/PageShell";
 import Breadcrumb from "../../../../components/Breadcrumb";
 import { supabase } from "../../../../lib/supabase";
+import { sanitizeAboutHtml } from "../../../../lib/sanitizeAbout";
 
 type EventRow = {
   id: string;
@@ -181,7 +182,7 @@ export default async function CenterEventPage({
             {event.body ? (
               <div
                 style={{ fontSize: 17, lineHeight: 1.8, color: "#4C4238" }}
-                dangerouslySetInnerHTML={{ __html: event.body.replace(/\n\n/g, "</p><p>").replace(/^/, "<p>").replace(/$/, "</p>") }}
+                dangerouslySetInnerHTML={{ __html: sanitizeAboutHtml(event.body.replace(/\n\n/g, "</p><p>").replace(/^/, "<p>").replace(/$/, "</p>")) }}
               />
             ) : (
               <p style={{ fontSize: 17, lineHeight: 1.8, color: "#4C4238" }}>

@@ -9,7 +9,23 @@
  * If the portal version changes, change this file in lockstep.
  */
 
+// Gendered shirt sizes (Men / Women / Boy / Girl) plus legacy unisex
+// Adult-* / Youth-* values retained for backward compatibility with rows
+// already in walk_registrations. The grouped form is the canonical
+// presentation for the registration dropdown.
+export const SHIRT_SIZE_GROUPS: ReadonlyArray<{
+  label: string;
+  options: readonly string[];
+}> = [
+  { label: "Men", options: ["Men-S", "Men-M", "Men-L", "Men-XL", "Men-2XL", "Men-3XL"] },
+  { label: "Women", options: ["Women-S", "Women-M", "Women-L", "Women-XL", "Women-2XL", "Women-3XL"] },
+  { label: "Boy", options: ["Boy-XS", "Boy-S", "Boy-M", "Boy-L", "Boy-XL"] },
+  { label: "Girl", options: ["Girl-XS", "Girl-S", "Girl-M", "Girl-L", "Girl-XL"] },
+];
+
 export const SHIRT_SIZES = [
+  ...SHIRT_SIZE_GROUPS.flatMap((g) => g.options),
+  // Legacy unisex (deprecated for new orders, retained for backward compat)
   "Adult-S",
   "Adult-M",
   "Adult-L",
