@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageShell from "../../components/PageShell";
 import Breadcrumb from "../../components/Breadcrumb";
 import { supabase } from "../../lib/supabase";
-import { getWalkathonByYear } from "../../lib/walkathon";
+import { getCenterWalkOverrides, getWalkathonByYear } from "../../lib/walkathon";
 import RegisterCityPicker from "./RegisterCityPicker";
 
 export const metadata: Metadata = {
@@ -14,21 +14,22 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600;
 
-async function getCenters(): Promise<{ slug: string; city: string; state: string }[]> {
+async function getCenters(): Promise<{ id: string; slug: string; city: string; state: string }[]> {
   const { data, error } = await supabase
     .from("centers")
-    .select("slug, city, state")
+    .select("id, slug, city, state")
     .order("city");
   if (error || !data) return [];
-  return (data as { slug: string; city: string; state: string }[]).filter(
+  return (data as { id: string; slug: string; city: string; state: string }[]).filter(
     (c) => !!c.slug,
   );
 }
 
 export default async function Walk2027Page() {
-  const [walkathon, centers] = await Promise.all([
+  const [walkathon, centers, centerOverrides] = await Promise.all([
     getWalkathonByYear(2027),
     getCenters(),
+    getCenterWalkOverrides(),
   ]);
 
   const registrationUrlTemplate = walkathon?.registration_url ?? null;
@@ -286,6 +287,7 @@ export default async function Walk2027Page() {
             <RegisterCityPicker
               centers={centers}
               registrationUrlTemplate={registrationUrlTemplate}
+              centerOverrides={centerOverrides}
             />
           </div>
         </div>

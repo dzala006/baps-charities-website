@@ -2,14 +2,28 @@
 
 import { useMemo, useState } from "react";
 
-type CenterOption = { slug: string; city: string; state: string };
+type CenterOption = {
+  id: string;
+  slug: string;
+  city: string;
+  state: string;
+};
+
+type CenterOverride = {
+  hostOwnWalk: boolean;
+  walkRegistrationUrl: string | null;
+};
+
+const SAFE_URL_RE = /^https?:\/\/[^\s]+$/i;
 
 export default function RegisterCityPicker({
   centers,
   registrationUrlTemplate,
+  centerOverrides,
 }: {
   centers: CenterOption[];
   registrationUrlTemplate: string | null;
+  centerOverrides?: Record<string, CenterOverride>;
 }) {
   const [slug, setSlug] = useState<string>("");
 
@@ -18,10 +32,27 @@ export default function RegisterCityPicker({
     [centers],
   );
 
+  const selected = useMemo(
+    () => sortedCenters.find((c) => c.slug === slug) ?? null,
+    [slug, sortedCenters],
+  );
+
+  const override = selected ? centerOverrides?.[selected.id] ?? null : null;
+  const isCenterHosted =
+    override?.hostOwnWalk === true &&
+    !!override.walkRegistrationUrl &&
+    SAFE_URL_RE.test(override.walkRegistrationUrl);
+
   const href = useMemo(() => {
-    if (!slug || !registrationUrlTemplate) return null;
-    return registrationUrlTemplate.replace("{slug}", slug);
-  }, [slug, registrationUrlTemplate]);
+    if (!slug) return null;
+    if (isCenterHosted && override?.walkRegistrationUrl) {
+      return override.walkRegistrationUrl;
+    }
+    if (registrationUrlTemplate) {
+      return registrationUrlTemplate.replace("{slug}", slug);
+    }
+    return null;
+  }, [slug, registrationUrlTemplate, isCenterHosted, override]);
 
   const inp: React.CSSProperties = {
     width: "100%",
@@ -127,7 +158,9 @@ export default function RegisterCityPicker({
       </div>
 
       <p style={{ fontSize: 11, color: "#5c5249", marginTop: 16, lineHeight: 1.5 }}>
-        Registration runs on our portal. Opens in a new tab.
+        {isCenterHosted
+          ? "This center hosts its own walk — opens on their site in a new tab."
+          : "Registration runs on our portal. Opens in a new tab."}
       </p>
     </div>
   );

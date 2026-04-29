@@ -36,6 +36,8 @@ type CenterPageContent = {
   contact: CenterPageContact;
   customLinks: CenterPageCustomLink[];
   galleryImageUrls: string[];
+  hostOwnWalk: boolean;
+  walkRegistrationUrl: string | null;
 };
 
 function asEvent(raw: unknown): CenterPageEvent | null {
@@ -75,7 +77,7 @@ async function getCenterPageContent(
   const { data } = await supabase
     .from("center_pages")
     .select(
-      "hero_image_url, about_html, upcoming_events, contact_block, custom_links, gallery_image_urls",
+      "hero_image_url, about_html, upcoming_events, contact_block, custom_links, gallery_image_urls, host_own_walk, walk_registration_url",
     )
     .eq("center_id", centerId)
     .maybeSingle();
@@ -88,6 +90,8 @@ async function getCenterPageContent(
     contact_block: unknown;
     custom_links: unknown;
     gallery_image_urls: string[] | null;
+    host_own_walk: boolean | null;
+    walk_registration_url: string | null;
   };
   return {
     heroImageUrl:
@@ -107,6 +111,8 @@ async function getCenterPageContent(
           .filter((l): l is CenterPageCustomLink => l !== null)
       : [],
     galleryImageUrls: (row.gallery_image_urls ?? []).filter(isSafeUrl),
+    hostOwnWalk: row.host_own_walk === true,
+    walkRegistrationUrl: row.walk_registration_url,
   };
 }
 
@@ -227,6 +233,12 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
     activeWalkathon,
     center.slug,
     FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE,
+    pageContent
+      ? {
+          hostOwnWalk: pageContent.hostOwnWalk,
+          walkRegistrationUrl: pageContent.walkRegistrationUrl,
+        }
+      : null,
   );
   const walkLabel = activeWalkathon
     ? activeWalkathon.name.replace(/^Walk\s+/, "Walk | Run ")
@@ -474,12 +486,17 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            {/* Active Walkathon CTA — sourced from walkathons.registration_url */}
+            {/* Active Walkathon CTA — sourced from walkathons.registration_url
+                with per-center host_own_walk override taking precedence. */}
             <div style={{ background: "#2a241f", color: "#fff", borderRadius: 4, padding: 28 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>{walkLabel}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>
+                {walkCta.isCenterHosted ? `${center.city} hosts its own walk` : walkLabel}
+              </div>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 22, margin: "8px 0 12px", lineHeight: 1.2 }}>Walk with us in {center.city}</h3>
               <div style={{ fontSize: 14, color: "#b1aca7", lineHeight: 1.7, marginBottom: 20 }}>
-                The annual 3K community walk/run · $15 per person · All ages · Free parking
+                {walkCta.isCenterHosted
+                  ? "Center-hosted walk — register through the link below."
+                  : "The annual 3K community walk/run · $15 per person · All ages · Free parking"}
               </div>
               <a
                 href={walkCta.href}
