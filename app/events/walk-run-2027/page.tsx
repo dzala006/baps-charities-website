@@ -304,10 +304,10 @@ export default async function Walk2027Page() {
                   lineHeight: 1.7,
                 }}
               >
-                <div>📍 3K trail walk/run · all ages · free parking</div>
-                <div>💛 $15 registration per person</div>
-                <div>🤝 100% volunteer organized and managed</div>
-                <div>🏥 Local beneficiary receives funds on stage</div>
+                <div>3K trail walk/run · all ages · free parking</div>
+                <div>$15 registration per person</div>
+                <div>100% volunteer organized and managed</div>
+                <div>Local beneficiary receives funds on stage</div>
               </div>
             </div>
           </div>
