@@ -84,7 +84,6 @@ describe("resolveRegistrationCta — per-center override (priority 1)", () => {
   it("rejects unsafe javascript: URL even with mode='host_own' (defense in depth)", () => {
     const override: CenterWalkOverride = {
       hostOwnWalk: true,
-      // eslint-disable-next-line no-script-url
       walkRegistrationUrl: "javascript:alert(1)",
       mode: "host_own",
     };

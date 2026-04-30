@@ -12,10 +12,13 @@ export const metadata: Metadata = {
     "Register for the 2027 BAPS Charities Walk | Run in your city. Pick a city to register on the BAPS portal.",
 };
 
-// Short ISR so per-center host_own_walk overrides set in the portal CMS
-// surface here within ~1 minute (or instantly when the on-demand revalidate
-// secret is wired up).
-export const revalidate = 60;
+// Force-dynamic for parity with /centers/[slug]: per-center
+// walkathon_registration_mode flips (default / host_own / opt_out) need to
+// surface in the city picker the moment a coordinator hits Save in the
+// portal CMS, not after a 60s ISR window. The cost is one cheap server
+// render per request — three Supabase reads, all on small tables — which
+// is fine for this traffic level.
+export const dynamic = "force-dynamic";
 
 async function getCenters(): Promise<{ id: string; slug: string; city: string; state: string }[]> {
   const { data, error } = await supabase
