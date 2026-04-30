@@ -9,7 +9,11 @@ import { sanitizeAboutHtml, isSafeUrl } from "../../lib/sanitizeAbout";
 import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "../../lib/featureFlags";
 import { getActiveWalkathon, resolveRegistrationCta } from "../../lib/walkathon";
 
-export const revalidate = 3600;
+// Short ISR window so CMS edits show up within ~1 minute even when the
+// portal's on-demand /api/revalidate hook hasn't been wired up yet (requires
+// matching REVALIDATE_SECRET on this Vercel project + portal Vercel project).
+// When the secret IS set, revalidatePath() makes changes appear within seconds.
+export const revalidate = 60;
 
 // ----- Editable center page content -----------------------------------------
 

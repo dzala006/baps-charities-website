@@ -12,7 +12,10 @@ export const metadata: Metadata = {
     "Register for the 2027 BAPS Charities Walk | Run in your city. Pick a city to register on the BAPS portal.",
 };
 
-export const revalidate = 3600;
+// Short ISR so per-center host_own_walk overrides set in the portal CMS
+// surface here within ~1 minute (or instantly when the on-demand revalidate
+// secret is wired up).
+export const revalidate = 60;
 
 async function getCenters(): Promise<{ id: string; slug: string; city: string; state: string }[]> {
   const { data, error } = await supabase
