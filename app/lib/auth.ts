@@ -11,7 +11,71 @@
  */
 
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+
+/**
+ * Server-side anon Supabase client backed by the request's auth cookies.
+ * RLS still applies — pass to queries that should be scoped to the
+ * caller's identity (e.g. own-row reads/writes via auth.uid()).
+ *
+ * For the register action and other mutations that bypass RLS, use
+ * `getSupabaseAdmin()` from supabase-admin.ts instead.
+ */
+export async function getServerSupabase(): Promise<SupabaseClient> {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+          // Wrapped in try/catch because server components can read cookies but not
+          // write them — only route handlers and server actions can. Refresh-token
+          // rotation lands here from a server component context occasionally.
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options),
+            );
+          } catch {
+            // ignore: read-only context (server component)
+          }
+        },
+      },
+    },
+  );
+}
+
+/**
+ * Returns the authenticated user from the request cookies, or null. Uses
+ * `getUser()` (not `getSession()`) so the JWT is verified against the auth
+ * server — required for any server-side authorization decision.
+ */
+export async function getCurrentUser(): Promise<User | null> {
+  const supabase = await getServerSupabase();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) return null;
+  return data.user;
+}
+
+/**
+ * Validate a `next` query param to ensure it points to a same-origin path.
+ * Anything not starting with a single `/` (relative paths, absolute URLs,
+ * `//host`, `javascript:`, etc.) returns the supplied fallback.
+ */
+export function safeNextPath(
+  raw: string | null | undefined,
+  fallback = "/portal",
+): string {
+  if (!raw || typeof raw !== "string") return fallback;
+  if (!raw.startsWith("/")) return fallback;
+  if (raw.startsWith("//")) return fallback;
+  if (/^\/?\s*(javascript|data|vbscript):/i.test(raw)) return fallback;
+  return raw;
+}
 
 export type ScopedRole =
   | "national_admin"

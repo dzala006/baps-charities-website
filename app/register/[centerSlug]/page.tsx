@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
+import { getCurrentUser } from "@/app/lib/auth";
 import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "@/app/lib/featureFlags";
 import { getCenterWalkathonMode } from "@/app/lib/walkathon";
 import RegisterForm from "./RegisterForm";
@@ -72,6 +73,16 @@ export default async function RegisterPage({
   if (!FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE) notFound();
 
   const { centerSlug } = await params;
+
+  // Auth gate. Unauthenticated users land on /login with a `next` param so
+  // they return to this exact registration form after sign-in. Tying every
+  // walk_registrations row to an auth.users row enables the /my-walks
+  // self-service flow (see migration 2620).
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect(`/login?next=/register/${centerSlug}`);
+  }
+
   const ctx = await loadContext(centerSlug);
   if (!ctx) notFound();
 
@@ -80,5 +91,11 @@ export default async function RegisterPage({
   const mode = await getCenterWalkathonMode(ctx.center.id);
   if (mode === "opt_out") notFound();
 
-  return <RegisterForm center={ctx.center} walkathon={ctx.walkathon} />;
+  return (
+    <RegisterForm
+      center={ctx.center}
+      walkathon={ctx.walkathon}
+      prefilledEmail={user.email ?? ""}
+    />
+  );
 }

@@ -90,6 +90,7 @@ export default function Header() {
           <div className={styles.utilityLinks}>
             {isLoggedIn ? (
               <>
+                <Link href="/my-walks" className={styles.utilityLink}>My walks</Link>
                 <Link href="/portal" className={styles.utilityLink}>My Account</Link>
                 <button
                   type="button"
@@ -177,6 +178,7 @@ export default function Header() {
           <div className={styles.drawerFooter}>
             {isLoggedIn ? (
               <>
+                <Link href="/my-walks" className={styles.drawerUtilLink} onClick={() => setMenuOpen(false)}>My walks</Link>
                 <Link href="/portal" className={styles.drawerUtilLink} onClick={() => setMenuOpen(false)}>My Account</Link>
                 <button type="button" className={styles.drawerUtilLink} onClick={() => { setMenuOpen(false); void handleSignOut(); }}>Sign out</button>
               </>
