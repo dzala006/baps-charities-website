@@ -13,11 +13,15 @@ import {
   type WalkathonRegistrationMode,
 } from "../../lib/walkathon";
 
-// Short ISR window so CMS edits show up within ~1 minute even when the
-// portal's on-demand /api/revalidate hook hasn't been wired up yet (requires
-// matching REVALIDATE_SECRET on this Vercel project + portal Vercel project).
-// When the secret IS set, revalidatePath() makes changes appear within seconds.
-export const revalidate = 60;
+// Fully dynamic: each request rebuilds the page so CMS edits surface
+// instantly. ISR + revalidatePath wasn't reliably refreshing the
+// page-rendered DB reads (Next 16 app-router serverless caching layer kept
+// returning stale Supabase results even after on-demand revalidate). Cost:
+// each /centers/[slug] request runs server-rendering instead of serving
+// pre-built HTML. With 105 centers and modest traffic this is fine. When
+// traffic picks up, revisit with explicit `unstable_noStore` calls scoped
+// to the supabase reads instead of marking the whole page dynamic.
+export const dynamic = "force-dynamic";
 
 // ----- Editable center page content -----------------------------------------
 
