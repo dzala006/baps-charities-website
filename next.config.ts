@@ -33,14 +33,6 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
-  // isomorphic-dompurify pulls jsdom -> html-encoding-sniffer -> @exodus/bytes
-  // (ESM-only). Next/Turbopack's bundler tries to require() encoding-lite.js
-  // and crashes the serverless function with ERR_REQUIRE_ESM at runtime
-  // (visible only on Vercel, not local). Externalising the wrapper makes
-  // Next load it via native node require from node_modules at runtime, which
-  // resolves the ESM boundary correctly. jsdom itself is already on Next
-  // 16's auto-externals list.
-  serverExternalPackages: ["isomorphic-dompurify"],
   images: {
     remotePatterns: [
       {
