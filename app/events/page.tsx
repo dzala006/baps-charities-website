@@ -48,7 +48,7 @@ export default function EventsPage() {
                   <span style={{ fontSize: 12, color: "#7a716a" }}>{e.date}</span>
                 </div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 22, lineHeight: 1.2, margin: 0, color: "#2a241f" }}>{e.title}</h3>
-                <div style={{ fontSize: 13, color: "#4C4238", marginTop: 8 }}>📍 {e.city}</div>
+                <div style={{ fontSize: 13, color: "#4C4238", marginTop: 8 }}>{e.city}</div>
                 <div style={{ fontSize: 12, color: "#7a716a", marginTop: 14, paddingTop: 14, borderTop: "1px solid #E4DFDA" }}>{e.spots}</div>
               </div>
             </Link>

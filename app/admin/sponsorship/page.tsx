@@ -41,21 +41,6 @@ export default function SponsorshipPage() {
           maxWidth: 640,
         }}
       >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            background: "#f5f0eb",
-            borderRadius: 8,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 22,
-            marginBottom: 20,
-          }}
-        >
-          📋
-        </div>
         <h2
           style={{
             fontFamily: "var(--font-display, serif)",
