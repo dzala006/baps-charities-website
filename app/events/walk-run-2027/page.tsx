@@ -29,11 +29,17 @@ async function getCenters(): Promise<{ id: string; slug: string; city: string; s
 }
 
 export default async function Walk2027Page() {
-  const [walkathon, centers, centerOverrides] = await Promise.all([
+  const [walkathon, allCenters, centerOverrides] = await Promise.all([
     getWalkathonByYear(2027),
     getCenters(),
     getCenterWalkOverrides(),
   ]);
+
+  // Filter out centers that opted out of hosting a walk this year — they
+  // shouldn't appear in the city picker.
+  const centers = allCenters.filter(
+    (c) => centerOverrides[c.id]?.mode !== "opt_out",
+  );
 
   const registrationUrlTemplate = walkathon?.registration_url ?? null;
 
