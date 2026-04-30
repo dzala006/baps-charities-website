@@ -9,23 +9,30 @@ export async function register() {
 }
 
 /**
- * Boot-time assertion (audit MEDIUM I3): refuse to start the production
- * server if the newsletter rate limiter is not wired. In dev we warn but do
- * not fail, so local development without Upstash still works.
+ * Boot-time check for the newsletter rate limiter.
+ *
+ * Original audit MEDIUM I3 made this throw in production so a missing
+ * Upstash config would fail-loud. In practice the throw fires from
+ * `registerInstrumentation` BEFORE per-route function init on Vercel, which
+ * means every cold start of any dynamic route (e.g. /centers/[slug])
+ * surfaces an unhandled rejection in logs. The only consumer of the limiter
+ * is /api/newsletter, which `getNewsletterRatelimit()` already gracefully
+ * degrades to "no rate limiting" when Upstash env vars are absent, so a
+ * boot-time throw is heavier than warranted.
+ *
+ * TODO: when UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN are set on
+ *   Vercel, this check becomes a no-op (the early-return at the top
+ *   handles it). No further action needed at that point.
  */
 function assertProductionRateLimitsConfigured(): void {
-  const isProd = process.env.NODE_ENV === "production";
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (url && token) return;
 
-  const msg =
+  // Soft-fail in every environment: log loudly so the gap is visible in
+  // Vercel + Sentry, but do not crash route-handler init.
+  console.error(
     "[newsletter] Rate limiter is not configured — set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN. " +
-    "Without them /api/newsletter accepts unlimited POSTs.";
-  if (isProd) {
-    // Fail fast — Vercel surfaces this in the build/runtime logs and the
-    // function will not start.
-    throw new Error(msg);
-  }
-  console.warn(msg);
+      "Without them /api/newsletter accepts unlimited POSTs.",
+  );
 }

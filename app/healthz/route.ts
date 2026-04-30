@@ -3,15 +3,20 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 async function checkSupabase(): Promise<{ ok: boolean; latencyMs: number }> {
+  // Probe a known public-RLS table (`regions`, 5 rows, anon select allowed)
+  // rather than the bare `/rest/v1/` PostgREST root — that root has flapped
+  // between 200 / 400 / 401 / 404 across Supabase versions. A real table
+  // read is the only honest "is the API up + is the anon key valid" probe.
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) return { ok: false, latencyMs: 0 };
+  const apikey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !apikey) return { ok: false, latencyMs: 0 };
   const start = Date.now();
   try {
-    const res = await fetch(`${url}/rest/v1/`, {
-      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "" },
+    const res = await fetch(`${url}/rest/v1/regions?select=id&limit=1`, {
+      headers: { apikey, Authorization: `Bearer ${apikey}` },
       signal: AbortSignal.timeout(5000),
     });
-    return { ok: res.ok || res.status === 400, latencyMs: Date.now() - start };
+    return { ok: res.ok, latencyMs: Date.now() - start };
   } catch {
     return { ok: false, latencyMs: Date.now() - start };
   }
