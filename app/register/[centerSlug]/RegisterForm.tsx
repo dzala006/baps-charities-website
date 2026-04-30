@@ -29,23 +29,25 @@ interface WalkathonCtx {
   nationalEventDate: string;
 }
 
-const EMPTY: FormInput = {
-  participantName: "",
-  email: "",
-  phone: "",
-  dateOfBirth: "",
-  shirtSize: "",
-  fundraisingTargetDollars: "",
-  waiverConsent: false,
-  guardianName: "",
-  guardianEmail: "",
-  guardianPhone: "",
-  guardianConsent: false,
-  coppaSelfAttest: false,
-  coppaDataConsent: false,
-  teamName: "",
-  familyMembers: [],
-};
+function makeInitialForm(prefilledEmail: string): FormInput {
+  return {
+    participantName: "",
+    email: prefilledEmail,
+    phone: "",
+    dateOfBirth: "",
+    shirtSize: "",
+    fundraisingTargetDollars: "",
+    waiverConsent: false,
+    guardianName: "",
+    guardianEmail: "",
+    guardianPhone: "",
+    guardianConsent: false,
+    coppaSelfAttest: false,
+    coppaDataConsent: false,
+    teamName: "",
+    familyMembers: [],
+  };
+}
 
 const EMPTY_FAMILY_MEMBER: FamilyMemberInput = {
   name: "",
@@ -59,14 +61,16 @@ const INITIAL_STATE = { ok: false } as const;
 export default function RegisterForm({
   center,
   walkathon,
+  prefilledEmail = "",
 }: {
   center: CenterCtx;
   walkathon: WalkathonCtx;
+  prefilledEmail?: string;
 }) {
   const action = submitRegistration.bind(null, center.slug);
   const [state, formAction, isPending] = useActionState(action, INITIAL_STATE);
 
-  const [form, setForm] = useState<FormInput>(EMPTY);
+  const [form, setForm] = useState<FormInput>(() => makeInitialForm(prefilledEmail));
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
   const age = ageFromDob(form.dateOfBirth);
@@ -161,6 +165,13 @@ export default function RegisterForm({
           error={errors.participantName}
         />
 
+        {prefilledEmail && (
+          <p style={loggedInHintStyle} aria-live="polite">
+            Logged in as <strong>{prefilledEmail}</strong>. Your registration
+            will be linked to this account so you can manage it later.
+          </p>
+        )}
+
         <div style={twoCol}>
           <Field
             id="email"
@@ -169,6 +180,7 @@ export default function RegisterForm({
             label="Email"
             autoComplete="email"
             required
+            readOnly={Boolean(prefilledEmail)}
             value={form.email}
             onChange={(v) => update("email", v)}
             error={errors.email}
@@ -512,6 +524,7 @@ function Field(props: {
   label: string;
   type?: string;
   required?: boolean;
+  readOnly?: boolean;
   autoComplete?: string;
   inputMode?: "numeric" | "text";
   value: string;
@@ -531,12 +544,13 @@ function Field(props: {
         autoComplete={props.autoComplete}
         inputMode={props.inputMode}
         required={props.required}
+        readOnly={props.readOnly}
         aria-required={props.required ? "true" : undefined}
         aria-invalid={props.error ? "true" : undefined}
         aria-describedby={props.error ? `${props.id}-error` : undefined}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
-        style={inputStyle}
+        style={props.readOnly ? readOnlyInputStyle : inputStyle}
       />
       {props.error && (
         <p id={`${props.id}-error`} role="alert" style={fieldErrorStyle}>
@@ -696,6 +710,31 @@ const inputStyle: React.CSSProperties = {
   fontFamily: "inherit",
   width: "100%",
   boxSizing: "border-box",
+};
+
+const readOnlyInputStyle: React.CSSProperties = {
+  ...{
+    padding: "10px 12px",
+    fontSize: 14,
+    border: "1px solid #c9c2bb",
+    borderRadius: 4,
+    background: "#f1ede8",
+    color: "#7a716a",
+    fontFamily: "inherit",
+    width: "100%",
+    boxSizing: "border-box",
+    cursor: "not-allowed",
+  },
+};
+
+const loggedInHintStyle: React.CSSProperties = {
+  fontSize: 13,
+  color: "#4C4238",
+  background: "#faf7f3",
+  border: "1px solid #E4DFDA",
+  borderRadius: 4,
+  padding: "10px 14px",
+  margin: 0,
 };
 
 const fieldErrorStyle: React.CSSProperties = {

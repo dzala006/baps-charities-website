@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
+import { safeNextPath } from "@/app/lib/auth";
 
 export const metadata = { title: "Sign In — BAPS Charities" };
 
@@ -9,7 +10,9 @@ async function signIn(formData: FormData) {
   "use server";
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const next = (formData.get("next") as string) || "/portal";
+  // Validate the post-login redirect is a same-origin path to prevent
+  // open-redirect abuse via a crafted `next=https://evil.example`.
+  const next = safeNextPath(formData.get("next") as string | null, "/portal");
 
   const cookieStore = await cookies();
   const supabase = createServerClient(
@@ -42,7 +45,7 @@ interface PageProps {
 
 export default async function LoginPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const next = params.next ?? "/portal";
+  const next = safeNextPath(params.next, "/portal");
   const error = params.error;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";

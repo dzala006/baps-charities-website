@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getSupabaseAdmin } from "@/app/lib/supabase-admin";
+import { getCurrentUser } from "@/app/lib/auth";
 import { sendMailgunEmail } from "@/app/lib/mailgun";
 import {
   REGISTRATION_SUBJECT,
@@ -106,6 +107,15 @@ export async function submitRegistration(
     return { ok: false, message: "Registration is not enabled on this site." };
   }
 
+  // Auth gate. The page also redirects unauthenticated users to /login, but
+  // a server action can be invoked directly (e.g. via cached form POST), so
+  // re-check here and refuse to write without an auth.users row to attach.
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect(`/login?next=/register/${centerSlug}`);
+  }
+  const userId = user.id;
+
   const input = formInputFromFormData(formData);
   const errors = validateRegistration(input);
   if (Object.keys(errors).length > 0) {
@@ -201,6 +211,7 @@ export async function submitRegistration(
     source: "website",
     team_name: teamName,
     family_group_id: familyGroupId,
+    user_id: userId,
   };
 
   const { data: inserted, error: insertErr } = await supabase
@@ -273,6 +284,7 @@ export async function submitRegistration(
         source: "website",
         team_name: teamName,
         family_group_id: familyGroupId,
+        user_id: userId,
       };
     });
 
