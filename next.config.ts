@@ -9,11 +9,12 @@ const CSP_REPORT_ONLY = [
   "default-src 'self'",
   // 'unsafe-inline' / 'unsafe-eval' kept for Next.js hydration + dev tooling;
   // remove once we wire nonces.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.sentry.io https://*.ingest.sentry.io",
+  // challenges.cloudflare.com hosts Turnstile's api.js + widget XHR.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.sentry.io https://*.ingest.sentry.io https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://media.bapscharities.org https://images.unsplash.com https://*.supabase.co",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://api.stripe.com",
+  "connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://api.stripe.com https://challenges.cloudflare.com",
   "frame-src 'self' https://js.stripe.com https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",
