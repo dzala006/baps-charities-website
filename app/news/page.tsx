@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     "Stories from the field — health, environment, education, humanitarian, and community news from BAPS Charities.",
 };
 
+// Short ISR so chapter activities published from the portal surface within
+// ~1 minute. The route already merges the static curated feed with center_events
+// rows filtered to is_published+source='legacy-import'.
+export const revalidate = 60;
+
 // Sort by parsed date descending; entries without a parseable date sink
 // to the bottom but still render.
 function dateRank(a: Article): number {
