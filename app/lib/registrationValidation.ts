@@ -77,6 +77,15 @@ export function ageGroupFor(age: number): AgeGroup {
   return "child";
 }
 
+export interface FamilyMemberInput {
+  name: string;
+  dateOfBirth: string;
+  shirtSize: string;
+  waiverConsent: boolean;
+}
+
+export const MAX_FAMILY_MEMBERS = 5;
+
 export interface FormInput {
   participantName: string;
   email: string;
@@ -91,14 +100,22 @@ export interface FormInput {
   guardianConsent: boolean;
   coppaSelfAttest: boolean;
   coppaDataConsent: boolean;
+  teamName: string;
+  familyMembers: FamilyMemberInput[];
 }
 
 export type FormErrors = Record<string, string>;
+
+export const TEAM_NAME_MAX_LENGTH = 80;
 
 /**
  * Validate a registration form input. Returns a map of field → message;
  * an empty object means the form is valid. Mirrors the portal's
  * validateForm() in Register.tsx.
+ *
+ * Family members are validated under the same rules as the primary; their
+ * errors are namespaced under `familyMembers.{i}.{field}` so the form can
+ * surface them next to the correct row.
  */
 export function validateRegistration(form: FormInput): FormErrors {
   const errs: FormErrors = {};
@@ -124,6 +141,10 @@ export function validateRegistration(form: FormInput): FormErrors {
     errs.fundraisingTargetDollars = "Must be a number";
   }
 
+  if (form.teamName && form.teamName.length > TEAM_NAME_MAX_LENGTH) {
+    errs.teamName = `Team name must be ${TEAM_NAME_MAX_LENGTH} characters or fewer`;
+  }
+
   const age = ageFromDob(form.dateOfBirth);
   const minorClass = classifyMinor(age);
   const isMinor = minorClass !== "adult";
@@ -139,6 +160,56 @@ export function validateRegistration(form: FormInput): FormErrors {
       if (!form.coppaDataConsent) errs.coppaDataConsent = "COPPA: data-collection consent required";
     }
   }
+
+  // Family members
+  if (form.familyMembers.length > MAX_FAMILY_MEMBERS) {
+    errs.familyMembers = `At most ${MAX_FAMILY_MEMBERS} additional walkers per registration`;
+  }
+
+  // If ANY family member is under 18, the primary form's guardian fields
+  // are required even when the primary registrant themselves is an adult —
+  // the same guardian data is reused on each minor's row.
+  const anyFamilyMinor = form.familyMembers.some((m) => {
+    if (!m.dateOfBirth) return false;
+    const a = ageFromDob(m.dateOfBirth);
+    return a >= 0 && a < 18;
+  });
+  if (anyFamilyMinor && !isMinor) {
+    if (!form.guardianName.trim())
+      errs.guardianName = "Required when registering a minor in the family group";
+    if (!isEmail(form.guardianEmail))
+      errs.guardianEmail = "Valid email required when registering a minor";
+    if (!form.guardianConsent)
+      errs.guardianConsent = "Guardian consent required";
+  }
+
+  form.familyMembers.forEach((member, i) => {
+    const prefix = `familyMembers.${i}.`;
+    if (!member.name.trim()) errs[`${prefix}name`] = "Required";
+    if (member.name.length > 200) errs[`${prefix}name`] = "Too long (max 200)";
+    if (!member.dateOfBirth) {
+      errs[`${prefix}dateOfBirth`] = "Required";
+    } else {
+      const a = ageFromDob(member.dateOfBirth);
+      if (a < 0 || a > 120) errs[`${prefix}dateOfBirth`] = "Invalid date";
+    }
+    if (!member.shirtSize) errs[`${prefix}shirtSize`] = "Required";
+    else if (!SHIRT_SIZES.includes(member.shirtSize as ShirtSize)) {
+      errs[`${prefix}shirtSize`] = "Invalid shirt size";
+    }
+    if (!member.waiverConsent)
+      errs[`${prefix}waiverConsent`] = "Waiver must be signed for each walker";
+
+    // Reject under-13 family members for now — COPPA dual-consent UX is only
+    // built for the primary registrant. Adults / 13–17 are allowed.
+    if (member.dateOfBirth) {
+      const a = ageFromDob(member.dateOfBirth);
+      if (a >= 0 && a < 13) {
+        errs[`${prefix}dateOfBirth`] =
+          "For walkers under 13, please register them as the primary participant in a separate form.";
+      }
+    }
+  });
 
   return errs;
 }

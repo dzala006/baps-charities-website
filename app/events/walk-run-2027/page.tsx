@@ -117,7 +117,25 @@ export default async function Walk2027Page() {
             Pick your city and register on the BAPS Center Portal. Registration is hosted on
             our portal — you&apos;ll be taken there in a new tab.
           </p>
-          <div style={{ marginTop: 32 }}>
+          <div style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <Link
+              href="/leaderboard"
+              style={{
+                padding: "14px 28px",
+                background: "#CF3728",
+                color: "#fff",
+                border: "1px solid #CF3728",
+                borderRadius: 4,
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+                display: "inline-block",
+              }}
+            >
+              See team leaderboard →
+            </Link>
             <Link
               href="/events/walk-run-2026"
               style={{

@@ -13,6 +13,9 @@ import {
   ageFromDob,
   ageGroupFor,
   classifyMinor,
+  MAX_FAMILY_MEMBERS,
+  TEAM_NAME_MAX_LENGTH,
+  type FamilyMemberInput,
   type FormInput,
 } from "@/app/lib/registrationValidation";
 import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "@/app/lib/featureFlags";
@@ -54,6 +57,25 @@ async function verifyTurnstile(token: string | null): Promise<boolean> {
 function formInputFromFormData(fd: FormData): FormInput {
   const get = (k: string) => (fd.get(k) as string | null)?.toString() ?? "";
   const checked = (k: string) => fd.get(k) === "on" || fd.get(k) === "true";
+
+  // Family members are submitted as familyMembers.{i}.{field} pairs and
+  // bounded by familyMemberCount. Clamp the count defensively at MAX so a
+  // tampered hidden input can't make the server iterate forever.
+  const rawCount = parseInt(get("familyMemberCount") || "0", 10);
+  const familyCount = Number.isFinite(rawCount)
+    ? Math.min(Math.max(rawCount, 0), MAX_FAMILY_MEMBERS)
+    : 0;
+
+  const familyMembers: FamilyMemberInput[] = [];
+  for (let i = 0; i < familyCount; i++) {
+    familyMembers.push({
+      name: get(`familyMembers.${i}.name`).trim(),
+      dateOfBirth: get(`familyMembers.${i}.dateOfBirth`),
+      shirtSize: get(`familyMembers.${i}.shirtSize`),
+      waiverConsent: checked(`familyMembers.${i}.waiverConsent`),
+    });
+  }
+
   return {
     participantName: get("participantName").trim(),
     email: get("email").trim(),
@@ -68,6 +90,8 @@ function formInputFromFormData(fd: FormData): FormInput {
     guardianConsent: checked("guardianConsent"),
     coppaSelfAttest: checked("coppaSelfAttest"),
     coppaDataConsent: checked("coppaDataConsent"),
+    teamName: get("teamName").trim().slice(0, TEAM_NAME_MAX_LENGTH),
+    familyMembers,
   };
 }
 
@@ -108,7 +132,23 @@ export async function submitRegistration(
     return { ok: false, message: `We couldn't find a center for "${centerSlug}".` };
   }
 
-  // Resolve active walkathon (year 2026, status='Open')
+  // Honor per-center opt_out at the action layer so the form can't be
+  // bypassed by replaying a cached POST.
+  const { data: centerPage } = await supabase
+    .from("center_pages")
+    .select("walkathon_registration_mode")
+    .eq("center_id", center.id)
+    .maybeSingle();
+  const mode = (centerPage as { walkathon_registration_mode?: string } | null)
+    ?.walkathon_registration_mode;
+  if (mode === "opt_out") {
+    return {
+      ok: false,
+      message: "This center is not hosting a walk this year.",
+    };
+  }
+
+  // Resolve active walkathon (highest year, status='Open').
   const { data: walkathon, error: walkErr } = await supabase
     .from("walkathons")
     .select("id, year, name, national_event_date")
@@ -133,6 +173,14 @@ export async function submitRegistration(
       ? Math.max(0, parseInt(input.fundraisingTargetDollars, 10) * 100)
       : null;
 
+  const teamName = input.teamName ? input.teamName : null;
+
+  // Primary insert. Other family members are linked to this row's id via
+  // family_group_id (a uuid we mint here and stamp on every row including
+  // the primary so the family group is queryable by a single id).
+  const familyGroupId =
+    input.familyMembers.length > 0 ? crypto.randomUUID() : null;
+
   const insertRow = {
     walkathon_id: walkathon.id,
     center_id: center.id,
@@ -151,6 +199,8 @@ export async function submitRegistration(
     consent_minor_guardian_phone: isMinor ? input.guardianPhone || null : null,
     consent_minor_guardian_signed_at: isMinor ? new Date().toISOString() : null,
     source: "website",
+    team_name: teamName,
+    family_group_id: familyGroupId,
   };
 
   const { data: inserted, error: insertErr } = await supabase
@@ -169,6 +219,73 @@ export async function submitRegistration(
       ok: false,
       message: "Failed to save your registration. Please try again or contact your local center.",
     };
+  }
+
+  const primaryId = inserted.id as string;
+
+  // Family-member rows. Email is reused from the primary with a suffix so
+  // the existing UNIQUE (walkathon_id, email) constraint doesn't reject
+  // siblings. The suffix is `+fam{i}` which is RFC-5233-compliant subaddress
+  // notation; most providers route it to the same inbox while keeping the
+  // string unique at the DB layer.
+  if (input.familyMembers.length > 0) {
+    // Reuse the primary's guardian fields when the primary is an adult but a
+    // family member is a minor.
+    const guardianName = isMinor
+      ? input.guardianName
+      : input.guardianName.trim() || input.participantName;
+    const guardianEmail = isMinor
+      ? input.guardianEmail.toLowerCase()
+      : input.email.toLowerCase();
+    const guardianPhone = isMinor
+      ? input.guardianPhone || null
+      : input.phone || null;
+
+    const familyRows = input.familyMembers.map((m, i) => {
+      const memberAge = ageFromDob(m.dateOfBirth);
+      const memberMinor = memberAge < 18;
+      const [local, domain] = input.email.toLowerCase().split("@");
+      // Defensive: if no @ in email, just append. validateRegistration
+      // rejects malformed emails before we get here anyway.
+      const familyEmail = domain
+        ? `${local}+fam${i + 1}@${domain}`
+        : `${input.email.toLowerCase()}-fam${i + 1}`;
+
+      return {
+        walkathon_id: walkathon.id,
+        center_id: center.id,
+        participant_name: m.name,
+        email: familyEmail,
+        phone: null,
+        date_of_birth: m.dateOfBirth,
+        age_group: ageGroupFor(memberAge),
+        shirt_size: m.shirtSize,
+        registration_fee_cents: 0,
+        payment_status: "free",
+        fundraising_target_cents: null,
+        consent_waiver_signed_at: new Date().toISOString(),
+        consent_minor_guardian_name: memberMinor ? guardianName : null,
+        consent_minor_guardian_email: memberMinor ? guardianEmail : null,
+        consent_minor_guardian_phone: memberMinor ? guardianPhone : null,
+        consent_minor_guardian_signed_at: memberMinor
+          ? new Date().toISOString()
+          : null,
+        source: "website",
+        team_name: teamName,
+        family_group_id: familyGroupId,
+      };
+    });
+
+    const { error: familyErr } = await supabase
+      .from("walk_registrations")
+      .insert(familyRows);
+
+    if (familyErr) {
+      // Best-effort: log + continue. The primary already inserted; we don't
+      // want to roll it back. The coordinator can finish the family member
+      // sign-up by hand if this happens.
+      console.error("[register] family insert failed (primary kept)", familyErr);
+    }
   }
 
   // Confirmation email — best-effort, never blocks the registration.
@@ -200,10 +317,12 @@ export async function submitRegistration(
       (await headers()).get("x-real-ip") ??
       (await headers()).get("x-forwarded-for")?.split(",")[0].trim() ??
       "anonymous";
-    console.log(`[register] new website registration id=${inserted.id} ip=${ip}`);
+    console.log(
+      `[register] new website registration id=${primaryId} family=${input.familyMembers.length} ip=${ip}`,
+    );
   } catch {
     // headers() may not be available outside a request scope; ignore.
   }
 
-  redirect(`/register/${centerSlug}/confirmed?id=${inserted.id}`);
+  redirect(`/register/${centerSlug}/confirmed?id=${primaryId}`);
 }

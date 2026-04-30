@@ -5,8 +5,11 @@ import { submitRegistration } from "./actions";
 import {
   ageFromDob,
   classifyMinor,
+  MAX_FAMILY_MEMBERS,
   SHIRT_SIZE_GROUPS,
+  TEAM_NAME_MAX_LENGTH,
   validateRegistration,
+  type FamilyMemberInput,
   type FormInput,
 } from "@/app/lib/registrationValidation";
 import TurnstileWidget from "./TurnstileWidget";
@@ -40,6 +43,15 @@ const EMPTY: FormInput = {
   guardianConsent: false,
   coppaSelfAttest: false,
   coppaDataConsent: false,
+  teamName: "",
+  familyMembers: [],
+};
+
+const EMPTY_FAMILY_MEMBER: FamilyMemberInput = {
+  name: "",
+  dateOfBirth: "",
+  shirtSize: "",
+  waiverConsent: false,
 };
 
 const INITIAL_STATE = { ok: false } as const;
@@ -73,6 +85,26 @@ export default function RegisterForm({
       setClientErrors((e) => {
         const next = { ...e };
         delete next[key as string];
+        return next;
+      });
+    }
+  }
+
+  function updateFamilyMember<K extends keyof FamilyMemberInput>(
+    index: number,
+    key: K,
+    value: FamilyMemberInput[K],
+  ) {
+    setForm((f) => {
+      const next = [...f.familyMembers];
+      next[index] = { ...next[index], [key]: value };
+      return { ...f, familyMembers: next };
+    });
+    const errKey = `familyMembers.${index}.${key as string}`;
+    if (clientErrors[errKey]) {
+      setClientErrors((e) => {
+        const next = { ...e };
+        delete next[errKey];
         return next;
       });
     }
@@ -113,6 +145,11 @@ export default function RegisterForm({
       </header>
 
       <form action={formAction} onSubmit={handleClientValidate} style={formStyle} noValidate>
+        <input
+          type="hidden"
+          name="familyMemberCount"
+          value={String(form.familyMembers.length)}
+        />
         <Field
           id="participantName"
           name="participantName"
@@ -181,6 +218,37 @@ export default function RegisterForm({
           onChange={(v) => update("fundraisingTargetDollars", v)}
           error={errors.fundraisingTargetDollars}
         />
+
+        <div style={fieldStyle}>
+          <label htmlFor="teamName" style={labelStyle}>
+            Team name (optional)
+          </label>
+          <input
+            id="teamName"
+            name="teamName"
+            type="text"
+            maxLength={TEAM_NAME_MAX_LENGTH}
+            autoComplete="off"
+            value={form.teamName}
+            onChange={(e) => update("teamName", e.target.value)}
+            aria-invalid={errors.teamName ? "true" : undefined}
+            aria-describedby={errors.teamName ? "teamName-error" : "teamName-help"}
+            style={inputStyle}
+          />
+          <p id="teamName-help" style={helpTextStyle}>
+            Walking with friends? Pick a team name; everyone using the same name
+            is grouped on the public{" "}
+            <a href="/leaderboard" style={{ color: "#8E191D" }}>
+              leaderboard
+            </a>
+            .
+          </p>
+          {errors.teamName && (
+            <p id="teamName-error" role="alert" style={fieldErrorStyle}>
+              {errors.teamName}
+            </p>
+          )}
+        </div>
 
         {isMinor && (
           <fieldset style={guardianBlockStyle}>
@@ -260,6 +328,109 @@ export default function RegisterForm({
             )}
           </fieldset>
         )}
+
+        <fieldset style={familyBlockStyle}>
+          <legend style={legendStyle}>Add family members (optional)</legend>
+          <p style={familyHelpStyle}>
+            Register up to {MAX_FAMILY_MEMBERS} additional walkers in this same
+            submission. Each walker needs their own date of birth, shirt size,
+            and waiver consent. For walkers under 13, please register them as
+            the primary participant in a separate form.
+          </p>
+
+          {form.familyMembers.map((member, i) => {
+            const prefix = `familyMembers.${i}.`;
+            return (
+              <div key={i} style={familyMemberRowStyle}>
+                <div style={familyMemberHeaderStyle}>
+                  <span style={familyMemberLabelStyle}>Walker #{i + 2}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm((f) => {
+                        const next = [...f.familyMembers];
+                        next.splice(i, 1);
+                        return { ...f, familyMembers: next };
+                      });
+                      // Clear stale errors for this member
+                      setClientErrors((e) => {
+                        const next = { ...e };
+                        Object.keys(next).forEach((k) => {
+                          if (k.startsWith(prefix)) delete next[k];
+                        });
+                        return next;
+                      });
+                    }}
+                    style={familyRemoveBtnStyle}
+                    aria-label={`Remove walker #${i + 2}`}
+                  >
+                    Remove
+                  </button>
+                </div>
+                <Field
+                  id={`fm-name-${i}`}
+                  name={`${prefix}name`}
+                  label="Walker's full name"
+                  required
+                  value={member.name}
+                  onChange={(v) => updateFamilyMember(i, "name", v)}
+                  error={errors[`${prefix}name`]}
+                />
+                <div style={twoCol}>
+                  <Field
+                    id={`fm-dob-${i}`}
+                    name={`${prefix}dateOfBirth`}
+                    type="date"
+                    label="Date of birth"
+                    required
+                    value={member.dateOfBirth}
+                    onChange={(v) => updateFamilyMember(i, "dateOfBirth", v)}
+                    error={errors[`${prefix}dateOfBirth`]}
+                  />
+                  <SelectField
+                    id={`fm-shirt-${i}`}
+                    name={`${prefix}shirtSize`}
+                    label="Shirt size"
+                    required
+                    optgroups={SHIRT_SIZE_GROUPS}
+                    value={member.shirtSize}
+                    onChange={(v) => updateFamilyMember(i, "shirtSize", v)}
+                    error={errors[`${prefix}shirtSize`]}
+                  />
+                </div>
+                <Checkbox
+                  id={`fm-waiver-${i}`}
+                  name={`${prefix}waiverConsent`}
+                  label="I have read and agree to the BAPS Charities walk/run waiver and release of liability for this walker."
+                  checked={member.waiverConsent}
+                  onChange={(v) => updateFamilyMember(i, "waiverConsent", v)}
+                  error={errors[`${prefix}waiverConsent`]}
+                />
+              </div>
+            );
+          })}
+
+          {form.familyMembers.length < MAX_FAMILY_MEMBERS && (
+            <button
+              type="button"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  familyMembers: [...f.familyMembers, { ...EMPTY_FAMILY_MEMBER }],
+                }))
+              }
+              style={familyAddBtnStyle}
+            >
+              + Add another walker
+            </button>
+          )}
+
+          {errors.familyMembers && (
+            <p role="alert" style={fieldErrorStyle}>
+              {errors.familyMembers}
+            </p>
+          )}
+        </fieldset>
 
         <details style={waiverDetailsStyle}>
           <summary style={waiverSummaryStyle}>
@@ -587,6 +758,77 @@ const submitButtonStyle: React.CSSProperties = {
   textTransform: "uppercase",
   cursor: "pointer",
   marginTop: 8,
+};
+
+const helpTextStyle: React.CSSProperties = {
+  fontSize: 12,
+  color: "#7a716a",
+  margin: 0,
+  lineHeight: 1.5,
+};
+
+const familyBlockStyle: React.CSSProperties = {
+  border: "1px solid #c9c2bb",
+  padding: 20,
+  borderRadius: 4,
+  display: "flex",
+  flexDirection: "column",
+  gap: 12,
+  background: "#faf7f3",
+  marginTop: 4,
+};
+
+const familyHelpStyle: React.CSSProperties = {
+  fontSize: 13,
+  color: "#4C4238",
+  lineHeight: 1.55,
+  margin: 0,
+};
+
+const familyMemberRowStyle: React.CSSProperties = {
+  border: "1px solid #E4DFDA",
+  background: "#fff",
+  borderRadius: 4,
+  padding: 16,
+  display: "flex",
+  flexDirection: "column",
+  gap: 12,
+};
+
+const familyMemberHeaderStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+const familyMemberLabelStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "#8E191D",
+};
+
+const familyRemoveBtnStyle: React.CSSProperties = {
+  background: "transparent",
+  border: "1px solid #c9c2bb",
+  color: "#4C4238",
+  fontSize: 12,
+  padding: "4px 12px",
+  borderRadius: 4,
+  cursor: "pointer",
+};
+
+const familyAddBtnStyle: React.CSSProperties = {
+  background: "transparent",
+  border: "1px dashed #8E191D",
+  color: "#8E191D",
+  fontSize: 13,
+  fontWeight: 600,
+  padding: "10px 16px",
+  borderRadius: 4,
+  cursor: "pointer",
+  alignSelf: "flex-start",
 };
 
 const waiverDetailsStyle: React.CSSProperties = {
