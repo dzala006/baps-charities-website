@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "@/app/lib/featureFlags";
+import { getCenterWalkathonMode } from "@/app/lib/walkathon";
 import RegisterForm from "./RegisterForm";
 
 export const metadata: Metadata = {
@@ -73,6 +74,11 @@ export default async function RegisterPage({
   const { centerSlug } = await params;
   const ctx = await loadContext(centerSlug);
   if (!ctx) notFound();
+
+  // Honor per-center opt-out: don't let users land on the form for a center
+  // that has chosen not to host this year.
+  const mode = await getCenterWalkathonMode(ctx.center.id);
+  if (mode === "opt_out") notFound();
 
   return <RegisterForm center={ctx.center} walkathon={ctx.walkathon} />;
 }

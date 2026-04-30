@@ -7,7 +7,11 @@ import Breadcrumb from "../../components/Breadcrumb";
 import { supabase } from "../../lib/supabase";
 import { sanitizeAboutHtml, isSafeUrl } from "../../lib/sanitizeAbout";
 import { FEATURE_PUBLIC_REGISTRATION_ON_WEBSITE } from "../../lib/featureFlags";
-import { getActiveWalkathon, resolveRegistrationCta } from "../../lib/walkathon";
+import {
+  getActiveWalkathon,
+  resolveRegistrationCta,
+  type WalkathonRegistrationMode,
+} from "../../lib/walkathon";
 
 // Short ISR window so CMS edits show up within ~1 minute even when the
 // portal's on-demand /api/revalidate hook hasn't been wired up yet (requires
@@ -42,6 +46,7 @@ type CenterPageContent = {
   galleryImageUrls: string[];
   hostOwnWalk: boolean;
   walkRegistrationUrl: string | null;
+  walkathonMode: WalkathonRegistrationMode;
 };
 
 function asEvent(raw: unknown): CenterPageEvent | null {
@@ -81,7 +86,7 @@ async function getCenterPageContent(
   const { data } = await supabase
     .from("center_pages")
     .select(
-      "hero_image_url, about_html, upcoming_events, contact_block, custom_links, gallery_image_urls, host_own_walk, walk_registration_url",
+      "hero_image_url, about_html, upcoming_events, contact_block, custom_links, gallery_image_urls, host_own_walk, walk_registration_url, walkathon_registration_mode",
     )
     .eq("center_id", centerId)
     .maybeSingle();
@@ -96,7 +101,16 @@ async function getCenterPageContent(
     gallery_image_urls: string[] | null;
     host_own_walk: boolean | null;
     walk_registration_url: string | null;
+    walkathon_registration_mode: string | null;
   };
+  const mode: WalkathonRegistrationMode =
+    row.walkathon_registration_mode === "host_own" ||
+    row.walkathon_registration_mode === "opt_out" ||
+    row.walkathon_registration_mode === "default"
+      ? row.walkathon_registration_mode
+      : row.host_own_walk === true
+        ? "host_own"
+        : "default";
   return {
     heroImageUrl:
       row.hero_image_url && isSafeUrl(row.hero_image_url)
@@ -117,6 +131,7 @@ async function getCenterPageContent(
     galleryImageUrls: (row.gallery_image_urls ?? []).filter(isSafeUrl),
     hostOwnWalk: row.host_own_walk === true,
     walkRegistrationUrl: row.walk_registration_url,
+    walkathonMode: mode,
   };
 }
 
@@ -241,6 +256,7 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
       ? {
           hostOwnWalk: pageContent.hostOwnWalk,
           walkRegistrationUrl: pageContent.walkRegistrationUrl,
+          mode: pageContent.walkathonMode,
         }
       : null,
   );
@@ -413,12 +429,14 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
             <div style={{ marginTop: 48 }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, color: "#2a241f", marginBottom: 20 }}>Get Involved</h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-                {[
+                {([
                   { title: "Volunteer", desc: "Join local service projects and community events.", href: "/get-involved" },
-                  { title: "Walk | Run 2026", desc: "Register for the annual walkathon in your city.", href: "/events/walk-run-2026" },
+                  ...(walkCta
+                    ? [{ title: "Walk | Run 2027", desc: "Register for the annual walkathon in your city.", href: "/events/walk-run-2027" }]
+                    : []),
                   { title: "Donate", desc: "Support programs in your community.", href: "/donate" },
                   { title: "Sponsor", desc: "Partner with us for the Walk | Run.", href: "/sponsorship" },
-                ].map((item) => (
+                ]).map((item) => (
                   <Link
                     key={item.title}
                     href={item.href}
@@ -491,26 +509,51 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
             )}
 
             {/* Active Walkathon CTA — sourced from walkathons.registration_url
-                with per-center host_own_walk override taking precedence. */}
-            <div style={{ background: "#2a241f", color: "#fff", borderRadius: 4, padding: 28 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>
-                {walkCta.isCenterHosted ? `${center.city} hosts its own walk` : walkLabel}
+                with per-center walkathon_registration_mode taking precedence.
+                Hidden entirely when the center has opted out (mode='opt_out'). */}
+            {walkCta ? (
+              <div style={{ background: "#2a241f", color: "#fff", borderRadius: 4, padding: 28 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>
+                  {walkCta.isCenterHosted ? `${center.city} hosts its own walk` : walkLabel}
+                </div>
+                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 22, margin: "8px 0 12px", lineHeight: 1.2 }}>Walk with us in {center.city}</h3>
+                <div style={{ fontSize: 14, color: "#b1aca7", lineHeight: 1.7, marginBottom: 20 }}>
+                  {walkCta.isCenterHosted
+                    ? "Center-hosted walk — register through the link below."
+                    : "The annual 3K community walk/run · $15 per person · All ages · Free parking"}
+                </div>
+                <a
+                  href={walkCta.href}
+                  target={walkCta.target}
+                  rel={walkCta.rel}
+                  style={{ display: "block", padding: "14px 0", background: "#CF3728", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", textAlign: "center" }}
+                >
+                  Register Now →
+                </a>
               </div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 22, margin: "8px 0 12px", lineHeight: 1.2 }}>Walk with us in {center.city}</h3>
-              <div style={{ fontSize: 14, color: "#b1aca7", lineHeight: 1.7, marginBottom: 20 }}>
-                {walkCta.isCenterHosted
-                  ? "Center-hosted walk — register through the link below."
-                  : "The annual 3K community walk/run · $15 per person · All ages · Free parking"}
-              </div>
-              <a
-                href={walkCta.href}
-                target={walkCta.target}
-                rel={walkCta.rel}
-                style={{ display: "block", padding: "14px 0", background: "#CF3728", color: "#fff", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", textAlign: "center" }}
+            ) : (
+              <div
+                style={{
+                  background: "#faf7f3",
+                  border: "1px solid #E4DFDA",
+                  borderRadius: 4,
+                  padding: 24,
+                }}
+                role="status"
+                aria-label="Walkathon participation"
               >
-                Register Now →
-              </a>
-            </div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#7a716a", marginBottom: 12 }}>
+                  Walkathon
+                </div>
+                <p style={{ fontSize: 14, color: "#4C4238", lineHeight: 1.6, margin: 0 }}>
+                  This center is not hosting a walk this year. Visit the{" "}
+                  <Link href="/find-a-center" style={{ color: "#8E191D" }}>
+                    Find a Center
+                  </Link>{" "}
+                  page to find a nearby walk.
+                </p>
+              </div>
+            )}
 
             {/* HQ contact */}
             <div style={{ background: "#faf7f3", border: "1px solid #E4DFDA", borderRadius: 4, padding: 24 }}>

@@ -10,6 +10,7 @@ import styles from "./Header.module.css";
 const NAV_ITEMS = [
   { label: "About", href: "/about" },
   { label: "Programs", href: "/programs" },
+  { label: "Walk 2027", href: "/events/walk-run-2027" },
   { label: "Get Involved", href: "/get-involved" },
   { label: "News", href: "/news" },
   { label: "Find a Center", href: "/find-a-center" },
