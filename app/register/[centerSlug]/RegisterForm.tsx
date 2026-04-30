@@ -261,6 +261,49 @@ export default function RegisterForm({
           </fieldset>
         )}
 
+        <details style={waiverDetailsStyle}>
+          <summary style={waiverSummaryStyle}>
+            Read the full liability waiver and release
+          </summary>
+          <div style={waiverBodyStyle}>
+            <h3 style={waiverHeadingStyle}>Walk/Run Liability Waiver and Release</h3>
+            <p style={waiverParaStyle}>
+              In consideration of being permitted to participate in the BAPS Charities
+              Walk/Run, I, on behalf of myself, my heirs, executors, administrators, and
+              assigns, hereby release and discharge BAPS Charities, its volunteers,
+              employees, sponsors, and affiliated organizations from any and all claims,
+              demands, actions, causes of action, suits of every kind and character
+              arising from or related to my participation.
+            </p>
+            <p style={waiverParaStyle}>
+              I acknowledge that I am physically able to participate in this 3K walk/run
+              event. I understand that I am responsible for my own safety and for the
+              safety of any minors I am registering. I agree to follow event guidelines
+              and instructions from event volunteers.
+            </p>
+            <p style={waiverParaStyle}>
+              <strong>Photo release:</strong> I grant permission for photographs and
+              video taken at the event to be used by BAPS Charities for promotional and
+              educational purposes.
+            </p>
+            <p style={waiverParaStyle}>
+              <strong>Medical authorization (for minors):</strong> In the event of a
+              medical emergency, I authorize event volunteers to seek medical care for
+              the participant if I am not immediately reachable.
+            </p>
+            <p style={waiverParaStyle}>
+              <a
+                href="/walk-run-waiver.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#8E191D" }}
+              >
+                Open the full waiver in a new tab (printable)
+              </a>
+            </p>
+          </div>
+        </details>
+
         <Checkbox
           id="waiverConsent"
           name="waiverConsent"
@@ -544,4 +587,39 @@ const submitButtonStyle: React.CSSProperties = {
   textTransform: "uppercase",
   cursor: "pointer",
   marginTop: 8,
+};
+
+const waiverDetailsStyle: React.CSSProperties = {
+  border: "1px solid #c9c2bb",
+  borderRadius: 4,
+  background: "#faf7f3",
+  padding: "12px 16px",
+  fontSize: 14,
+  color: "#4C4238",
+};
+const waiverSummaryStyle: React.CSSProperties = {
+  cursor: "pointer",
+  fontWeight: 600,
+  fontSize: 13,
+  color: "#2a241f",
+  letterSpacing: "0.02em",
+  outline: "none",
+};
+const waiverBodyStyle: React.CSSProperties = {
+  marginTop: 12,
+  paddingTop: 12,
+  borderTop: "1px solid #E4DFDA",
+};
+const waiverHeadingStyle: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontWeight: 400,
+  fontSize: 18,
+  color: "#2a241f",
+  margin: "0 0 12px",
+};
+const waiverParaStyle: React.CSSProperties = {
+  fontSize: 13,
+  lineHeight: 1.6,
+  color: "#4C4238",
+  margin: "0 0 12px",
 };
