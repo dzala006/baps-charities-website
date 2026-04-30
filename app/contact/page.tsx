@@ -30,8 +30,8 @@ export default function ContactPage() {
               <div style={{ fontWeight: 600, color: "#2a241f" }}>BAPS Charities</div>
               <div>112 North Main Street, Suite 301</div>
               <div>Robbinsville, NJ 08561</div>
-              <div style={{ marginTop: 8 }}>&#128222; <a href="tel:+18882273881" style={{ color: "#4C4238", textDecoration: "none" }}>1-888-227-3881</a></div>
-              <div style={{ marginTop: 8 }}>✉ <a href="mailto:info@bapscharities.org" style={{ color: "#8E191D" }}>info@bapscharities.org</a></div>
+              <div style={{ marginTop: 8 }}><a href="tel:+18882273881" style={{ color: "#4C4238", textDecoration: "none" }}>1-888-227-3881</a></div>
+              <div style={{ marginTop: 8 }}><a href="mailto:info@bapscharities.org" style={{ color: "#8E191D" }}>info@bapscharities.org</a></div>
             </div>
 
             <div style={{ marginTop: 32 }}>

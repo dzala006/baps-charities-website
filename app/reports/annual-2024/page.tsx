@@ -221,7 +221,7 @@ export default function AnnualReport2024Page() {
                 Source: IRS Form 990, FY2022 (most recent audited filing). EIN 26-1530694. Total revenue $7,721,499 · Total assets $22,331,646. Verified via ProPublica Nonprofit Explorer.
               </div>
               <div style={{ display: "flex", gap: 16, marginTop: 32, fontSize: 13 }}>
-                <a href="mailto:info@bapscharities.org?subject=Audited%20Financials%20Request" style={{ padding: "12px 20px", background: "#2a241f", color: "#fff", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>📄 Request audited financials</a>
+                <a href="mailto:info@bapscharities.org?subject=Audited%20Financials%20Request" style={{ padding: "12px 20px", background: "#2a241f", color: "#fff", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>Request audited financials</a>
                 <a href="https://projects.propublica.org/nonprofits/organizations/261530694" target="_blank" rel="noopener noreferrer" style={{ padding: "12px 20px", background: "#fff", border: "1px solid #c9c2bb", color: "#2a241f", textDecoration: "none", borderRadius: 4, fontWeight: 600 }}>IRS Form 990 (ProPublica) →</a>
               </div>
             </div>
