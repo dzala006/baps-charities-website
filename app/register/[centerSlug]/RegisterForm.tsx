@@ -9,6 +9,7 @@ import {
   validateRegistration,
   type FormInput,
 } from "@/app/lib/registrationValidation";
+import TurnstileWidget from "./TurnstileWidget";
 
 interface CenterCtx {
   id: string;
@@ -274,6 +275,12 @@ export default function RegisterForm({
             {state.message}
           </p>
         )}
+
+        {/* Turnstile renders nothing when NEXT_PUBLIC_TURNSTILE_SITE_KEY is
+            unset (dev bypass server-side), and a Cloudflare widget when set.
+            The widget injects a hidden cf-turnstile-response field that
+            actions.ts picks up via formData. */}
+        <TurnstileWidget />
 
         <button type="submit" disabled={isPending} style={submitButtonStyle}>
           {isPending ? "Submitting…" : "Submit registration"}

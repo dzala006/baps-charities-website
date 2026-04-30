@@ -68,8 +68,28 @@ const FAQS = [
   { q: "What is the event format?", a: "A 3K trail walk/run, open to all ages, with free parking at all venues." },
 ];
 
-export default function WalkContent() {
+// The 2026 walkathon's external registration URL is sourced from
+// walkathons.registration_url so the org can swap it from the DB without a
+// redeploy. The fallback string is for the rare DB-down case.
+const FALLBACK_REGISTRATION_URL = "https://walk2026.na.bapscharities.org";
+
+function urlHostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
+}
+
+interface WalkContentProps {
+  /** Live walkathons.registration_url for year=2026 (passed in from the
+   *  server component parent so this client component stays sync). */
+  registrationUrl?: string;
+}
+
+export default function WalkContent({ registrationUrl = FALLBACK_REGISTRATION_URL }: WalkContentProps = {}) {
   const [tab, setTab] = useState("about");
+  const registrationHost = urlHostname(registrationUrl);
 
   return (
     <>
@@ -119,8 +139,8 @@ export default function WalkContent() {
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#CF3728" }}>Register</div>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 24, margin: "8px 0 16px", lineHeight: 1.2 }}>Walk with us</h3>
               <div style={{ fontSize: 15, color: "#b1aca7", lineHeight: 1.6, marginBottom: 20 }}>$15 per person · All ages · 3K trail walk/run · Free parking</div>
-              <a href="https://walk2026.na.bapscharities.org" target="_blank" rel="noopener noreferrer" style={{ display: "block", width: "100%", padding: "16px 0", background: "#CF3728", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none", textAlign: "center", boxSizing: "border-box" }}>
-                Register at walk2026.na.bapscharities.org &rarr;
+              <a href={registrationUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", width: "100%", padding: "16px 0", background: "#CF3728", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none", textAlign: "center", boxSizing: "border-box" }}>
+                Register at {registrationHost} &rarr;
               </a>
               <div style={{ fontSize: 11, color: "#b1aca7", marginTop: 12, textAlign: "center" }}>Registration opens per city — check your city&apos;s date</div>
             </div>
@@ -152,7 +172,7 @@ export default function WalkContent() {
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 40, color: "#2a241f", margin: "0 0 8px" }}>Confirmed 2026 Dates</h2>
           <p style={{ fontSize: 15, color: "#7a716a", marginTop: 0, marginBottom: 40 }}>
             More cities and dates being added — check{" "}
-            <a href="https://walk2026.na.bapscharities.org" target="_blank" rel="noopener noreferrer" style={{ color: "#8E191D" }}>walk2026.na.bapscharities.org</a>{" "}
+            <a href={registrationUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#8E191D" }}>{registrationHost}</a>{" "}
             for the latest.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, marginBottom: 64 }}>
@@ -165,7 +185,7 @@ export default function WalkContent() {
                     {c.venue && <div style={{ fontSize: 13, color: "#7a716a", marginTop: 4 }}>{c.venue}</div>}
                     {c.beneficiary && <div style={{ fontSize: 12, color: "#4f7a3a", fontWeight: 600, marginTop: 4 }}>Beneficiary: {c.beneficiary}</div>}
                   </div>
-                  <a href="https://walk2026.na.bapscharities.org" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 14px", background: "#8E191D", color: "#fff", borderRadius: 4, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Register</a>
+                  <a href={registrationUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "8px 14px", background: "#8E191D", color: "#fff", borderRadius: 4, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Register</a>
                 </div>
               </div>
             ))}
@@ -238,7 +258,7 @@ export default function WalkContent() {
               More questions? Email{" "}
               <a href="mailto:info@bapscharities.org" style={{ color: "#8E191D" }}>info@bapscharities.org</a>{" "}
               or visit{" "}
-              <a href="https://walk2026.na.bapscharities.org" target="_blank" rel="noopener noreferrer" style={{ color: "#8E191D" }}>walk2026.na.bapscharities.org</a>.
+              <a href={registrationUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#8E191D" }}>{registrationHost}</a>.
             </div>
           </div>
         </div>
