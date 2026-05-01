@@ -412,7 +412,13 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
                       >
                         {ev.photo_url && (
                           <div style={{ position: "relative", width: 100, height: 70, borderRadius: 4, overflow: "hidden", background: "#E4DFDA", flexShrink: 0 }}>
-                            <img src={ev.photo_url} alt={ev.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            <Image
+                              src={ev.photo_url}
+                              alt={ev.title}
+                              fill
+                              sizes="100px"
+                              style={{ objectFit: "cover" }}
+                            />
                           </div>
                         )}
                         <div>
@@ -589,12 +595,15 @@ export default async function CenterPage({ params }: { params: Promise<{ slug: s
             >
               {pageContent.galleryImageUrls.map((url, i) => (
                 <div key={i} style={{ position: "relative", aspectRatio: "1 / 1", background: "#E4DFDA", borderRadius: 4, overflow: "hidden" }}>
-                  {/* Native <img> rather than next/image because storage signed URLs aren't on the next.config remotePatterns whitelist. */}
-                  <img
+                  {/* All gallery URLs come from media.bapscharities.org, which
+                      is on next.config.ts remotePatterns. Decorative — alt
+                      intentionally empty. */}
+                  <Image
                     src={url}
                     alt=""
-                    loading="lazy"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 220px"
+                    style={{ objectFit: "cover" }}
                   />
                 </div>
               ))}
