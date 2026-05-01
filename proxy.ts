@@ -2,6 +2,21 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Slug-naming gotcha: "Atlanta" center's canonical slug is lilburn-ga
+  // (city-state, not name-state). Permanent-redirect external links using
+  // the name-based form so they don't dead-end. Returns before the supabase
+  // session refresh — redirects don't need an auth round-trip.
+  if (
+    pathname === "/centers/atlanta-ga" ||
+    pathname.startsWith("/centers/atlanta-ga/")
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace("/centers/atlanta-ga", "/centers/lilburn-ga");
+    return NextResponse.redirect(url, 301);
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -30,7 +45,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname, search } = request.nextUrl;
+  const { search } = request.nextUrl;
   const isProtected =
     pathname.startsWith("/portal") || pathname.startsWith("/admin");
 
