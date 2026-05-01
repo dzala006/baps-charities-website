@@ -3,6 +3,8 @@ import Link from "next/link";
 import PageShell from "../components/PageShell";
 import Breadcrumb from "../components/Breadcrumb";
 import { supabase } from "../lib/supabase";
+import { aggregateTeams, type LeaderboardRow, type RawRegistrationRow } from "./aggregate";
+import LeaderboardFilters, { type WalkathonOption, type CenterOption } from "./LeaderboardFilters";
 
 export const metadata: Metadata = {
   title: "Leaderboard | BAPS Charities Walk 2027",
@@ -14,75 +16,73 @@ export const metadata: Metadata = {
 };
 
 // Short ISR so new team registrations show up promptly without hammering
-// the Supabase edge function on every page view.
+// the Supabase edge function on every page view. searchParams are part of
+// the cache key so each filter combination is cached independently.
 export const revalidate = 60;
 
-interface LeaderboardRow {
-  teamName: string;
-  walkers: number;
-  centersRepresented: number;
-  fundraisingTargetCents: number;
+interface CenterRow {
+  id: string;
+  slug: string;
+  city: string | null;
+  state: string | null;
 }
 
-interface RawRow {
-  team_name: string | null;
-  center_id: string | null;
-  fundraising_target_cents: number | null;
+interface WalkathonRow {
+  id: string;
+  year: number;
+  name: string;
+  status: string;
 }
 
-async function loadLeaderboard(): Promise<LeaderboardRow[]> {
-  // Pull the minimum fields needed for aggregation. Names + emails stay on
-  // the server; only aggregates leave this function.
-  const { data, error } = await supabase
+async function loadFilterOptions(): Promise<{
+  walkathons: WalkathonOption[];
+  centers: CenterOption[];
+  centerSlugToId: Map<string, string>;
+  walkathonYearToId: Map<number, string>;
+}> {
+  const [{ data: walkRows }, { data: centerRows }] = await Promise.all([
+    supabase
+      .from("walkathons")
+      .select("id, year, name, status")
+      .order("year", { ascending: false }),
+    supabase
+      .from("centers")
+      .select("id, slug, city, state")
+      .order("city", { ascending: true }),
+  ]);
+
+  const walkathons: WalkathonOption[] = ((walkRows as WalkathonRow[]) ?? []).map(
+    (w) => ({ year: w.year, name: w.name }),
+  );
+  const walkathonYearToId = new Map<number, string>();
+  for (const w of (walkRows as WalkathonRow[]) ?? []) {
+    walkathonYearToId.set(w.year, w.id);
+  }
+
+  const centers: CenterOption[] = ((centerRows as CenterRow[]) ?? [])
+    .filter((c) => c.city && c.state)
+    .map((c) => ({ slug: c.slug, city: c.city as string, state: c.state as string }));
+  const centerSlugToId = new Map<string, string>();
+  for (const c of (centerRows as CenterRow[]) ?? []) {
+    centerSlugToId.set(c.slug, c.id);
+  }
+
+  return { walkathons, centers, centerSlugToId, walkathonYearToId };
+}
+
+async function loadLeaderboard(opts: {
+  walkathonId: string | null;
+  centerId: string | null;
+}): Promise<LeaderboardRow[]> {
+  let query = supabase
     .from("walk_registrations")
     .select("team_name, center_id, fundraising_target_cents")
     .not("team_name", "is", null);
+  if (opts.walkathonId) query = query.eq("walkathon_id", opts.walkathonId);
+  if (opts.centerId) query = query.eq("center_id", opts.centerId);
+  const { data, error } = await query;
   if (error || !data) return [];
-
-  const rows = data as RawRow[];
-  const groups = new Map<
-    string,
-    {
-      displayName: string;
-      walkers: number;
-      centerIds: Set<string>;
-      fundraisingTargetCents: number;
-    }
-  >();
-
-  for (const row of rows) {
-    const raw = row.team_name?.trim();
-    if (!raw) continue;
-    const key = raw.toLowerCase();
-    let entry = groups.get(key);
-    if (!entry) {
-      entry = {
-        displayName: raw,
-        walkers: 0,
-        centerIds: new Set<string>(),
-        fundraisingTargetCents: 0,
-      };
-      groups.set(key, entry);
-    }
-    entry.walkers += 1;
-    if (row.center_id) entry.centerIds.add(row.center_id);
-    entry.fundraisingTargetCents += Math.max(0, row.fundraising_target_cents ?? 0);
-  }
-
-  const result: LeaderboardRow[] = Array.from(groups.values()).map((g) => ({
-    teamName: g.displayName,
-    walkers: g.walkers,
-    centersRepresented: g.centerIds.size,
-    fundraisingTargetCents: g.fundraisingTargetCents,
-  }));
-
-  result.sort(
-    (a, b) =>
-      b.fundraisingTargetCents - a.fundraisingTargetCents ||
-      b.walkers - a.walkers ||
-      a.teamName.localeCompare(b.teamName),
-  );
-  return result;
+  return aggregateTeams(data as RawRegistrationRow[]);
 }
 
 function formatUsd(cents: number): string {
@@ -90,10 +90,43 @@ function formatUsd(cents: number): string {
   return `$${(cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
-export default async function LeaderboardPage() {
-  const teams = await loadLeaderboard();
+interface PageProps {
+  searchParams: Promise<{
+    walkathon?: string | string[];
+    center?: string | string[];
+  }>;
+}
+
+export default async function LeaderboardPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const rawWalk = Array.isArray(sp.walkathon) ? sp.walkathon[0] : sp.walkathon;
+  const rawCenter = Array.isArray(sp.center) ? sp.center[0] : sp.center;
+
+  const { walkathons, centers, centerSlugToId, walkathonYearToId } =
+    await loadFilterOptions();
+
+  // Validate filter values against the option sets — drop any unknown values
+  // silently rather than 404'ing the page (cleaner UX for stale URLs).
+  const walkathonYearNum = rawWalk ? parseInt(rawWalk, 10) : NaN;
+  const validWalkathonYear =
+    !Number.isNaN(walkathonYearNum) && walkathonYearToId.has(walkathonYearNum)
+      ? String(walkathonYearNum)
+      : null;
+  const validCenterSlug =
+    rawCenter && centerSlugToId.has(rawCenter) ? rawCenter : null;
+
+  const walkathonId = validWalkathonYear
+    ? walkathonYearToId.get(parseInt(validWalkathonYear, 10)) ?? null
+    : null;
+  const centerId = validCenterSlug
+    ? centerSlugToId.get(validCenterSlug) ?? null
+    : null;
+
+  const teams = await loadLeaderboard({ walkathonId, centerId });
   const totalWalkers = teams.reduce((s, t) => s + t.walkers, 0);
   const totalGoalCents = teams.reduce((s, t) => s + t.fundraisingTargetCents, 0);
+
+  const hasFilters = Boolean(validWalkathonYear || validCenterSlug);
 
   return (
     <PageShell>
@@ -159,6 +192,13 @@ export default async function LeaderboardPage() {
 
       <section style={{ background: "#faf7f3", padding: "48px 32px 96px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <LeaderboardFilters
+            walkathons={walkathons}
+            centers={centers}
+            selectedWalkathon={validWalkathonYear}
+            selectedCenter={validCenterSlug}
+          />
+
           {teams.length === 0 ? (
             <div
               style={{
@@ -170,28 +210,50 @@ export default async function LeaderboardPage() {
               }}
             >
               <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, margin: "0 0 8px", color: "#2a241f" }}>
-                No teams registered yet
+                {hasFilters ? "No teams match these filters" : "No teams registered yet"}
               </h2>
               <p style={{ fontSize: 14, color: "#7a716a", margin: "0 auto 20px", maxWidth: 480 }}>
-                Be the first. When you register for the walk, pick a team name and your group shows up here.
+                {hasFilters
+                  ? "No teams have registered for the selected walkathon at the selected center yet."
+                  : "Be the first. When you register for the walk, pick a team name and your group shows up here."}
               </p>
-              <Link
-                href="/events/walk-run-2027"
-                style={{
-                  display: "inline-block",
-                  padding: "12px 24px",
-                  background: "#8E191D",
-                  color: "#fff",
-                  borderRadius: 4,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  textDecoration: "none",
-                }}
-              >
-                Register for Walk 2027 →
-              </Link>
+              {hasFilters ? (
+                <Link
+                  href="/leaderboard"
+                  style={{
+                    display: "inline-block",
+                    padding: "12px 24px",
+                    background: "#8E191D",
+                    color: "#fff",
+                    borderRadius: 4,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    textDecoration: "none",
+                  }}
+                >
+                  Reset filters
+                </Link>
+              ) : (
+                <Link
+                  href="/events/walk-run-2027"
+                  style={{
+                    display: "inline-block",
+                    padding: "12px 24px",
+                    background: "#8E191D",
+                    color: "#fff",
+                    borderRadius: 4,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    textDecoration: "none",
+                  }}
+                >
+                  Register for Walk 2027 →
+                </Link>
+              )}
             </div>
           ) : (
             <div
